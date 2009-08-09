@@ -331,5 +331,14 @@ or class name and method name is as same as any_name in SITES SETTING.
 
 If its value is started from Capital letter, it is regareded as class name.
 
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2009 Ktat, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
 =cut
+
+
 
