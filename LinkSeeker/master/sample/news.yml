@@ -1,0 +1,26 @@
+--- 
+prior_stored : 1
+# prior_stored : ['html', 'data']
+getter :
+  class: LWP
+data_store :
+  class: Dumper 
+  path : data/scraped
+html_store :
+  class: File
+  path : data/src
+
+sites:
+  nikkei_main_list:
+    url :
+     base:  http://www.nikkei.co.jp/news/$category/
+     variables:
+       category: nikkei_news_category
+    scraper : Nikkei
+    nest :
+      nikkei_news_detail:
+        from: news_detail_url
+        unique_name :
+          url: /([^/]+)\.html$
+
+
