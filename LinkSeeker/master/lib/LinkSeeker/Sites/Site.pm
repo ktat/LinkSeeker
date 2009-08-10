@@ -1,10 +1,13 @@
 package LinkSeeker::Sites::Site;
 
 use Any::Moose;
+use File::Slurp qw/slurp write_file/;
 use Clone qw/clone/;
+use Data::Dumper;
 
 extends 'LinkSeeker::Base';
 
+has ls      => (is => 'rw', isa => 'LinkSeeker');
 has url     => (is => 'rw');
 has nest    => (is => 'rw');
 has from    => (is => 'rw');
@@ -14,8 +17,9 @@ has parent_class => (is => 'rw');
 has unique_name  => (is => 'rw');
 
 sub BUILDARGS {
-  my ($class, $o_class, $opt) = @_;
-  $opt->{parent_class} = $o_class;
+  my ($class, $link_seeker, $opt) = @_;
+  $opt->{ls} = $link_seeker;
+  my $o_class = $opt->{parent_class} = (ref $link_seeker) || $link_seeker;
   LinkSeeker->_mk_object({map {exists $opt->{$_} ? ($_ => $opt->{$_}) : ()}
                           qw/data_store html_store/}, $opt);
   if (my $class_or_method = $opt->{scraper}) {
@@ -102,18 +106,25 @@ override url => sub {
       $num = $max if $max;
     }
     my @urls = ($base_url) x $num;
+    my @var_keys = keys %$var;
+    my %key_value;
+    foreach my $key (@var_keys) {
+      my $v = $var->{$key};
+      if (ref $v eq 'ARRAY') {
+        $key_value{$key} = [$v->[0] .. $v->[1]];
+      } elsif (ref $v eq 'HASH') {
+        $key_value{$key} = $v->{var};
+      } else {
+        $key_value{$key} = $v;
+      }
+    }
     foreach (my $i = 0; $i < @urls; $i++) {
       my $url = $urls[$i];
-      foreach my $key (keys %$var) {
-        my $v = $var->{$key};
-        if (ref $v eq 'ARRAY') {
-          my @vars = ($v->[0] .. $v->[1]);
-          $urls[$i] =~ s{\$\{?$key\}?}{$vars[$i]}g;
-        } elsif (ref $v eq 'HASH') {
-          my @vars = @{$v->{var}};
-          $urls[$i] =~ s{\$\{?$key\}?}{$vars[$i]}g;
+      foreach my $key (@var_keys) {
+        if (ref $key_value{$key} eq 'ARRAY') {
+          $urls[$i] =~ s{\$\{?$key\}?}{$key_value{$key}[$i]}g;
         } else {
-          $urls[$i] =~ s{\$\{?$key\}?}{$v}g;
+          $urls[$i] =~ s{\$\{?$key\}?}{$key_value{$key}}g;
         }
       }
     }
@@ -133,5 +144,32 @@ override unique_name => sub {
   }
   return $url;
 };
+
+sub stored_url {
+  return;
+  my ($self) = @_;
+  my $file_name = $self->ls->tmp_path . '/url_list.tmp';
+  if (-e $file_name and (-M $file_name) * 86400 < 36000) {
+    my $data = slurp($file_name);
+    $data = eval "$data";
+    return @$data;
+  }
+  return;
+}
+
+sub delete_stored_url {
+  return;
+  my ($self) = @_;
+  my $file_name = $self->ls->tmp_path . '/' . $self->name . 'url_list.tmp';
+  unlink $file_name;
+}
+
+sub store_url {
+  return;
+  my ($self, $urls) = @_;
+  my $file_name = $self->ls->tmp_path . '/' . $self->name . 'url_list.tmp';
+  local $Data::Dumper::Terse = 1;
+  write_file($file_name, Dumper($urls));
+}
 
 1;

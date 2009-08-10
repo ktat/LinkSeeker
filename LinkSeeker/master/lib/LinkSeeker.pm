@@ -3,9 +3,12 @@ package LinkSeeker;
 use Any::Moose;
 use String::CamelCase qw/camelize/;
 use Config::Any;
-use HTML::TreeBuilder::LibXML;
+use Time::HiRes ();
 
 extends 'LinkSeeker::Base';
+
+has tmp_path => (is => 'rw');
+has sleep    => (is => 'rw');
 
 our $VERSION;
 
@@ -25,19 +28,29 @@ sub import {
 
 sub BUILDARGS {
   my ($class, %opt) = @_;
+  my %option = (
+                prior_stored => 0,
+                tmp_path     => $ENV{TMP_DIR},
+                sleep        => 1,
+               );
   my $prior_stored = 0;
   if (my $file = delete $opt{file} || '') {
     my $files =  ref $file ? $file : [$file];
     my $cfgs = Config::Any->load_files({files => $files, use_ext => 1});
+
     my %config;
     foreach my $f_cfg (@$cfgs) {
       my ($f, $cfg) = %{$f_cfg || {}};
       @config{keys %$cfg} = values %{$cfg};
     }
-    $prior_stored = delete $config{prior_stored};
+    foreach my $k (keys %option) {
+      if (defined $config{$k}) {
+        $option{$k} = delete $config{$k};
+      }
+    }
     $class->_mk_object(\%config, \%opt);
   }
-  return { %opt, prior_stored => $prior_stored };
+  return { %opt, %option };
 }
 
 sub _mk_object {
@@ -55,17 +68,23 @@ sub run {
   my $self = shift;
   my $sites = $self->sites;
   while (my $site = $sites->next_site) {
+    $site->ls($self);
     $self->seek_links($site);
   }
 }
 
 sub seek_links {
   my ($self, $site) = @_;
-
-  foreach my $url ($site->url) {
-    my $data = $self->get_scraped_data($site, $url, $self->get_html_src($site, $url)) || '';
+  my @url_list;
+  unless (@url_list = $site->stored_url) {
+    @url_list = $site->url;
+    $site->store_url(\@url_list);
+  }
+  foreach my $url (@url_list) {
+    my $src = $self->get_html_src($site, $url);
+    next unless $src;
+    my $data = $self->get_scraped_data($site, $url, $src);
     next unless $data;
-
     # data_filter
     #  insert data to DB? do anything as you like
     if (my $data_filter = $site->data_filter) {
@@ -74,9 +93,10 @@ sub seek_links {
       $data_filter->$method($unique_name, $url, $data);
     }
     if (my $nest = $site->nest) {
-      my $child_sites = LinkSeeker::Sites->new(ref $self, $nest);
+      my $child_sites = LinkSeeker::Sites->new($self, $nest);
       my $parent_site = $site;
       while (my $site = $child_sites->next_site) {
+        $site->ls($self);
         $site->parent_site($parent_site);
         my $target = $site->from || 'link_seeker_url';
         if (ref $target) {
@@ -101,6 +121,7 @@ sub seek_links {
       }
     }
   }
+  $site->delete_stored_url;
 }
 
 sub get_html_src {
@@ -114,6 +135,9 @@ sub get_html_src {
     return $html_store->fetch_content($name, $unique_name);
   }
   my $src = $getter->get($url);
+  if ($self->sleep) {
+    Time::HiRes::usleep($self->sleep);
+  }
   # html_store
   if (defined $html_store) {
     if (defined $src) {
@@ -339,6 +363,4 @@ This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =cut
-
-
 

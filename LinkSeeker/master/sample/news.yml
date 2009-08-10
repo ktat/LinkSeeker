@@ -1,6 +1,8 @@
 --- 
+# perl -I../lib -Ilib  -e 'use News; my $ls = News->new(file => ["news.yml"]); $ls->run'
+
 prior_stored : 1
-# prior_stored : ['html', 'data']
+prior_stored : ['html', 'data']
 getter :
   class: LWP
 data_store :

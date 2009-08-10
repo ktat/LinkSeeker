@@ -15,7 +15,7 @@ sub store_content {
     unless (-d $self->path) {
       mkdir $self->path;
     }
-    mkdir join '/', $path;
+    mkdir $path;
   }
   my $file_name = join '/', $path, uri_escape($name_or_url);
   write_file($file_name, $src);
