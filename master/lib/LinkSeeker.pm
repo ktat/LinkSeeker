@@ -218,11 +218,15 @@ LSSample/Scraper.pm
  
  extends 'LinkSeeker::Scraper';
  
- sub page_list {
+ sub pref_list {
    # some code to scrape page
  }
  
- sub page_detail {
+ sub shop_list {
+   # some code to scrape page
+ }
+ 
+ sub shop_detail {
    # some code to scrape page
  }
 
