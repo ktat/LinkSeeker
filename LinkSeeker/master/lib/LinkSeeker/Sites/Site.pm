@@ -14,12 +14,15 @@ has from    => (is => 'rw');
 has name    => (is => 'rw');
 has parent_site  => (is => 'rw', isa => 'LinkSeeker::Sites::Site');
 has parent_class => (is => 'rw');
+has parent_object => (is => 'rw');
 has unique_name  => (is => 'rw');
 
 sub BUILDARGS {
   my ($class, $link_seeker, $opt) = @_;
   $opt->{ls} = $link_seeker;
   my $o_class = $opt->{parent_class} = (ref $link_seeker) || $link_seeker;
+  $opt->{parent_object} = $link_seeker;
+  die "not an object" unless ref $link_seeker;
   LinkSeeker->_mk_object({map {exists $opt->{$_} ? ($_ => $opt->{$_}) : ()}
                           qw/data_store html_store/}, $opt);
   if (my $class_or_method = $opt->{scraper}) {
@@ -96,9 +99,9 @@ override url => sub {
         my $_max;
         if (ref $v) {
           $_max = scalar @{[($v->[0] .. $v->[1])]};
-        } elsif ($self->parent_class->can($v)) {
-          $v = $self->parent_class->$v;
-          $_max = scalar @$v;
+        } elsif ($self->parent_object->can($v)) {
+          $v = $self->parent_object->$v;
+          $_max = 1; #scalar @$v;
           $var->{$k} = {var => $v};
         }
         $max = $_max if $max < $_max;

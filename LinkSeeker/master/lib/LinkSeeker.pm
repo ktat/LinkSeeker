@@ -34,6 +34,7 @@ sub BUILDARGS {
                 sleep        => 1,
                );
   my $prior_stored = 0;
+  my @mk_objects;
   if (my $file = delete $opt{file} || '') {
     my $files =  ref $file ? $file : [$file];
     my $cfgs = Config::Any->load_files({files => $files, use_ext => 1});
@@ -48,25 +49,38 @@ sub BUILDARGS {
         $option{$k} = delete $config{$k};
       }
     }
-    $class->_mk_object(\%config, \%opt);
+    push @mk_objects, [\%config, \%opt];
+    # $class->_mk_object(\%config, \%opt);
   }
-  return { %opt, %option };
+  return { %opt, %option, mk_objects => \@mk_objects };
+}
+
+sub BUILD {
+  my ($self, $opt) = @_;
+  my $mk_objects = delete $opt->{mk_objects};
+  foreach my $setting (@$mk_objects) {
+    $self->_mk_object(@$setting);
+  }
+  return $self;
 }
 
 sub _mk_object {
-  my ($class, $config, $opt) = @_;
+  my ($self, $config, $opt) = @_;
   foreach my $k (keys %$config) {
     my $class_config = $config->{$k};
     my $sub_class = ($class_config->{'class'}
                      ? __PACKAGE__ . '::' . camelize($k) . '::' . $class_config->{'class'}
                      : __PACKAGE__ . '::' . camelize($k));
-    $opt->{$k} = $sub_class->new($class, $class_config);
+    $self->{$k} = $sub_class->new($self, $class_config);
   }
 }
 
 sub run {
   my $self = shift;
   my $sites = $self->sites;
+  unless ($sites) {
+    die "sites method returns undefine value.\ncheck your configuration:\n";
+  }
   while (my $site = $sites->next_site) {
     $site->ls($self);
     $self->seek_links($site);
