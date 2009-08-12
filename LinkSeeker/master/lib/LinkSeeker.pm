@@ -113,7 +113,10 @@ sub seek_links {
         $site->ls($self);
         $site->parent_site($parent_site);
         my $target = $site->from || 'link_seeker_url';
-        if (ref $target) {
+        my ($url) = $site->url;
+        if (defined $url and $url) {
+          $data = $url;
+        } elsif (ref $target) {
           my @urls;
           for my $t (@$target) {
             if (ref $data eq 'HASH') {
@@ -125,7 +128,7 @@ sub seek_links {
             }
           }
           $data = \@urls if @urls;
-        } else {
+        } elsif ($data->{$target}) {
           $data = $data->{$target};
         }
         if (defined $data) {
