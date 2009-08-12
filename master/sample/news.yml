@@ -2,25 +2,31 @@
 # perl -I../lib -Ilib  -e 'use News; my $ls = News->new(file => ["news.yml"]); $ls->run'
 
 prior_stored : 1
+# This is same as the above
 prior_stored : ['html', 'data']
+
 getter :
+  # use LinkSeeker::Getter::LWP as getter
   class: LWP
 data_store :
+  # use LinkSeeker::DataStore::Dumper as data_store
   class: Dumper 
   path : data/scraped
 html_store :
+  # use LinkSeeker::HtmlStore::Fiel as html_store
   class: File
   path : data/src
 
 sites:
   nikkei_main_list:
     url :
-     # $category is variable.
+     # base url, $category is variable.
      base:  http://www.nikkei.co.jp/news/$category/
      variables:
        # nikkei_news_category is method name defined in the Class(News).
        # if method return array ref,  same number of url is to be target.
        category: nikkei_news_category
+    # use News::Nikkei as scraper
     scraper : Nikkei
     nest :
       # scraping goes on ...
