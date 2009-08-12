@@ -28,5 +28,5 @@ sites:
         # target url is gotten from 'news_detail_url' of parent data.
         from: news_detail_url
         unique_name :
-	  # generate unique name from the part of URL.
+          # generate unique name from the part of URL.
           url: /([^/]+)\.html$
