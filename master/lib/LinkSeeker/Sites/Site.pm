@@ -78,12 +78,15 @@ override data_filter => sub {
 override scraper => sub {
   my ($self) = @_;
   my $scraper = super();
-  my $ps = $self->parent_site;
+  my $parent_site = $self->parent_site;
+  if (!$scraper and !$parent_site) {
+    Carp::croak($self->name . " doesn't  have scraper setting and parent_site neither.");
+  }
   until ($scraper) {
-    if ($scraper = $ps->scraper) {
+    if ($scraper = $parent_site->scraper) {
       $self->scraper_method($self->name);
     } else {
-      $ps = $ps->parent_site or last;
+      $parent_site = $parent_site->parent_site or last;
     }
   }
   return $scraper;
@@ -107,7 +110,7 @@ override url => sub {
           $_max = scalar @{[($v->[0] .. $v->[1])]};
         } elsif ($self->parent_object->can($v)) {
           $v = $self->parent_object->$v;
-          $_max = 1; #scalar @$v;
+          $_max = ref $v eq 'ARRAY' ? scalar @$v : 1;
           $var->{$k} = {var => $v};
         }
         $max = $_max if $max < $_max;
