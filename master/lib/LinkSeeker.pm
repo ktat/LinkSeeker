@@ -86,9 +86,9 @@ sub seek_links {
     # data_filter
     #  insert data to DB? do anything as you like
     if (my $data_filter = $site->data_filter) {
-      my $unique_name = $site->unique_name($url);
+      my $unique_name = $url->unique_name;
       my $method = $site->data_filter_method || $site->name;
-      $data_filter->$method($unique_name, $url, $data);
+      $data_filter->$method($unique_name, $url->url, $data);
     }
     if (my $nest = $site->nest) {
       my $child_sites = LinkSeeker::Sites->new($self, $nest);
@@ -96,10 +96,10 @@ sub seek_links {
       while (my $site = $child_sites->next_site) {
         $site->ls($self);
         $site->parent_site($parent_site);
-        my $target = $site->from || 'link_seeker_url';
         my ($url) = $site->url;
-        if (defined $url and $url) {
-          $data = $url;
+        my $target = $url->from || 'link_seeker_url';
+        if (defined $url->url and $url->url) {
+          $data = $url->url;
         } elsif (ref $target) {
           my @urls;
           for my $t (@$target) {
@@ -107,7 +107,7 @@ sub seek_links {
               $data = $data->{$t};
             } else {
               foreach my $d (@$data) {
-                push @urls, $d->{$t};
+                push @urls, LinkSeeker::Sites::Site::URL->new(url => $d->{$t});
               }
             }
           }
@@ -129,7 +129,7 @@ sub get_html_src {
   my ($self, $site, $url) = @_;
   Carp::croak("url is required for " . $site->name) unless $url;
   my ($getter, $html_store) = ($site->getter || $self->getter, $site->html_store || $self->html_store);
-  my $unique_name = $site->unique_name($url);
+  my $unique_name = $url->unique_name;
   my $name = $site->name;
   my $prior_stored_html = $site->prior_stored_html || $self->prior_stored_html;
   if ($unique_name and $prior_stored_html and defined $html_store and $html_store->has_content($name, $unique_name)) {
@@ -153,7 +153,7 @@ sub get_html_src {
 sub get_scraped_data {
   my ($self, $site, $url, $src) = @_;
   my ($scraper, $data_store) = ($site->scraper, $site->data_store || $self->data_store);
-  my $unique_name = $site->unique_name($url);
+  my $unique_name = $url->unique_name;
   my $name = $site->name;
   my $prior_stored_data = $site->prior_stored_data || $self->prior_stored_data;
   if ($prior_stored_data and defined $data_store and $data_store->has_data($name, $unique_name)) {
@@ -169,7 +169,7 @@ sub get_scraped_data {
     $data = $data_store->fetch_data($name, $unique_name);
   }
   if (ref $data eq 'HASH') {
-    $data->{_source_url} = $url;
+    $data->{_source_url} = $url->url;
   }
   return $data;
 }

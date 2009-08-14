@@ -3,6 +3,7 @@ package LinkSeeker::Sites::Site;
 use Any::Moose;
 use File::Slurp qw/slurp write_file/;
 use Clone qw/clone/;
+use LinkSeeker::Sites::Site::URL;
 use Data::Dumper;
 
 extends 'LinkSeeker::Base';
@@ -15,7 +16,6 @@ has name    => (is => 'rw');
 has parent_site  => (is => 'rw', isa => 'LinkSeeker::Sites::Site');
 has parent_class => (is => 'rw');
 has parent_object => (is => 'rw');
-has unique_name  => (is => 'rw');
 
 sub BUILDARGS {
   my ($class, $link_seeker, $opt) = @_;
@@ -99,7 +99,8 @@ override url => sub {
     my $config = $url;
     $url = '';
     my $base_url = $config->{base};
-    my $var = clone $config->{variables};
+    my $base_post_data = $config->{post_data} || '';
+    my $var = clone($config->{variables});
     my $num = 1;
     if (defined $var) {
       my $max = 0;
@@ -118,6 +119,7 @@ override url => sub {
       $num = $max if $max;
     }
     my @urls = ($base_url) x $num;
+    my @post_data = ($base_post_data) x $num;
     my @var_keys = keys %$var;
     my %key_value;
     foreach my $key (@var_keys) {
@@ -132,29 +134,23 @@ override url => sub {
     }
     foreach (my $i = 0; $i < @urls; $i++) {
       my $url = $urls[$i];
+      my $post_data = $post_data[$i];
       foreach my $key (@var_keys) {
         if (ref $key_value{$key} eq 'ARRAY') {
           $urls[$i] =~ s{\$\{?$key\}?}{$key_value{$key}[$i]}g;
+          $post_data[$i] =~ s{\$\{?$key\}?}{$key_value{$key}[$i]}g if $base_post_data;
         } else {
           $urls[$i] =~ s{\$\{?$key\}?}{$key_value{$key}}g;
+          $post_data[$i] =~ s{\$\{?$key\}?}{$key_value{$key}}g if $base_post_data;
         }
       }
     }
-    return @urls;
+    return @post_data
+      ? (map {LinkSeeker::Sites::Site::URL->new(url => $urls[$_], post_data => $post_data[$_], from => $config->{from})} 0 .. $#urls)
+      : (map {LinkSeeker::Sites::Site::URL->new(url => $_, from => $config->{from})} @urls);
   } else {
-    return ref $url ? @{$url} : $url;
+    return map {LinkSeeker::Sites::Site::URL->new(url => $_)} (ref $url ? @{$url} : $url);
   }
-};
-
-override unique_name => sub {
-  my ($self, $url) = @_;
-  my $unique = $self->{unique_name};
-  if (my $re = $unique->{url}) {
-    if ($url =~ m{$re}) {
-      return $1;
-    }
-  }
-  return $url;
 };
 
 sub stored_url {

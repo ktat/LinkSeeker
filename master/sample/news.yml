@@ -3,7 +3,7 @@
 
 prior_stored : 1
 # This is same as the above
-prior_stored : ['html', 'data']
+# prior_stored : ['html', 'data']
 
 getter :
   # use LinkSeeker::Getter::LWP as getter
@@ -20,19 +20,21 @@ html_store :
 sites:
   nikkei_main_list:
     url :
-     # base url, $category is variable.
-     base:  http://www.nikkei.co.jp/news/$category/
-     variables:
-       # nikkei_news_category is method name defined in the Class(News).
-       # if method return array ref,  same number of url is to be target.
-       category: nikkei_news_category
+      # base url, $category is variable.
+      base:  http://www.nikkei.co.jp/news/$category/
+      variables:
+        # nikkei_news_category is method name defined in the Class(News).
+        # if method return array ref,  same number of url is to be target.
+        category: nikkei_news_category
+      post_data: 'hoge=1&fuga=2'
     # use News::Nikkei as scraper
     scraper : Nikkei
     nest :
       # scraping goes on ...
       nikkei_news_detail:
         # target url is gotten from 'news_detail_url' of parent data.
-        from: news_detail_url
-        unique_name :
-          # generate unique name from the part of URL.
-          url: /([^/]+)\.html$
+        url:
+          from: news_detail_url
+          unique_name :
+            # generate unique name from the part of URL.
+            url: /([^/]+)\.html$

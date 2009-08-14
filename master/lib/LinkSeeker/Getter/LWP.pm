@@ -15,8 +15,10 @@ sub process {
 }
 
 sub get {
-  my ($self, $url) = @_;
-  warn "get $url";
+  my ($self, $url_obj) = @_;
+  my ($url, $post_data) = ($url_obj->url, $url_obj->post_data);
+  warn "get $url\n";
+
   my $ua = LWP::UserAgent->new;
   $ua->agent($self->agent || 'LinkSeeker - ' . LinkSeeker->VERSION);
   if (my $h = $self->header) {
@@ -25,10 +27,10 @@ sub get {
     }
   }
   my $res;
-  unless ($self->post_data) {
+  unless ($post_data || $self->post_data) {
     $res = $ua->get($url);
   } else {
-    $res = $ua->post($url, Content => $self->post_data);
+    $res = $ua->post($url, Content => $post_data || $self->post_data);
   }
   if ($res->is_success) {
     return $res->content;
