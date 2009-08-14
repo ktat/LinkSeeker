@@ -1,7 +1,6 @@
 package LinkSeeker;
 
 use Any::Moose;
-use String::CamelCase qw/camelize/;
 use Config::Any;
 use Time::HiRes ();
 
@@ -50,40 +49,25 @@ sub BUILDARGS {
       }
     }
     push @mk_objects, [\%config, \%opt];
-    # $class->_mk_object(\%config, \%opt);
   }
   return { %opt, %option, mk_objects => \@mk_objects };
 }
 
-sub BUILD {
-  my ($self, $opt) = @_;
-  my $mk_objects = delete $opt->{mk_objects};
-  foreach my $setting (@$mk_objects) {
-    $self->_mk_object(@$setting);
-  }
-  return $self;
-}
-
-sub _mk_object {
-  my ($self, $config, $opt) = @_;
-  foreach my $k (keys %$config) {
-    my $class_config = $config->{$k};
-    my $sub_class = ($class_config->{'class'}
-                     ? __PACKAGE__ . '::' . camelize($k) . '::' . $class_config->{'class'}
-                     : __PACKAGE__ . '::' . camelize($k));
-    $self->{$k} = $sub_class->new($self, $class_config);
-  }
-}
-
 sub run {
   my $self = shift;
+  my (@target_site) = @_;
   my $sites = $self->sites;
   unless ($sites) {
     die "sites method returns undefine value.\ncheck your configuration:\n";
   }
+
+  my %tmp;
+  @tmp{@target_site} = ();
   while (my $site = $sites->next_site) {
-    $site->ls($self);
-    $self->seek_links($site);
+    if (!@target_site or exists $tmp{$site->name}) {
+      $site->ls($self);
+      $self->seek_links($site);
+    }
   }
 }
 
@@ -144,7 +128,7 @@ sub seek_links {
 sub get_html_src {
   my ($self, $site, $url) = @_;
   Carp::croak("url is required for " . $site->name) unless $url;
-  my ($getter, $html_store) = ($self->getter, $site->html_store || $self->html_store);
+  my ($getter, $html_store) = ($site->getter || $self->getter, $site->html_store || $self->html_store);
   my $unique_name = $site->unique_name($url);
   my $name = $site->name;
   my $prior_stored_html = $site->prior_stored_html || $self->prior_stored_html;
@@ -177,6 +161,7 @@ sub get_scraped_data {
   }
   my $scraper_method = $site->scraper_method;
   my $data = $scraper->$scraper_method($src);
+
   # data_store
   if (defined $data and $data) {
     $data_store->store_data($name, $unique_name, $data);
@@ -195,7 +180,7 @@ sub get_scraped_data {
 
 =head1 NAME
 
-LinkSeeker - seeks link in pages deeply with scraping.
+LinkSeeker - scraping framework to seek link deeply
 
 =head1 SYNOPSIS
 
@@ -273,12 +258,18 @@ site.yml
             # use LSSample::Scraper::shop_detail method as scraper
             scraper: shop_detail
 
+  another_site:
+    ...
+
 lssample.pl
 
  #!/usr/bin/perl
  use LSSample;
  
  LSSample->new(file =>['site.yml'])->run;
+ 
+ # only selected site
+ LSSample->new(file =>['site.yml'])->run('pref_list', ...);
 
 You can find source html under ...
 
@@ -291,7 +282,6 @@ You can find scraped data under ...
  data/scraped/pref_list
  data/scraped/shop_list
  data/scraped/shop_detail
-
 
 =head1 DESCRIPTION
 
@@ -310,7 +300,6 @@ Do scraping.
 =head1 YAML FILE
 
 =head2 FIRST LAYER SETTING
-
 
 =head3 prior_stored
 

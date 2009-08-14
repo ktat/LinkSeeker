@@ -23,8 +23,14 @@ sub BUILDARGS {
   my $o_class = $opt->{parent_class} = (ref $link_seeker) || $link_seeker;
   $opt->{parent_object} = $link_seeker;
   die "not an object" unless ref $link_seeker;
-  LinkSeeker->_mk_object({map {exists $opt->{$_} ? ($_ => $opt->{$_}) : ()}
-                          qw/data_store html_store/}, $opt);
+  my @mk_objects;
+
+  foreach my $class (qw/data_store html_store getter/) {
+    if (exists $opt->{$class}) {
+      push @mk_objects, [{$class => delete $opt->{$class}}];
+    }
+  }
+
   if (my $class_or_method = $opt->{scraper}) {
     my ($class, $method);
     if ($class_or_method =~/^[A-Z]/) {
@@ -51,7 +57,7 @@ sub BUILDARGS {
     $opt->{data_filter} = $class->new;
     $opt->{data_filter_method} ||= $method;
   }
-  return {%$opt}
+  return {%$opt, mk_objects => \@mk_objects}
 }
 
 override data_filter => sub {

@@ -1,6 +1,7 @@
 package LinkSeeker::Base;
 
 use Any::Moose;
+use String::CamelCase qw/camelize/;
 
 has sites       => (is => 'rw',
                     isa => 'LinkSeeker::Sites');
@@ -32,6 +33,28 @@ sub prior_stored_data {
   my ($self) = @_;
   my $stored = $self->prior_stored;
   return ref $stored ? (grep {$_ eq 'data'} @$stored) : $stored;
+}
+
+sub BUILD {
+  my ($self, $opt) = @_;
+  my $mk_objects = delete $opt->{mk_objects};
+  foreach my $setting (@{$mk_objects || []}) {
+    $self->_mk_object(@$setting);
+  }
+  return $self;
+}
+
+sub _mk_object {
+  my ($self, $config, $opt) = @_;
+  my $_class = __PACKAGE__;
+  $_class =~s/::Base$//;
+  foreach my $k (keys %$config) {
+    my $class_config = $config->{$k};
+    my $sub_class = ($class_config->{'class'}
+                     ? $_class . '::' . camelize($k) . '::' . $class_config->{'class'}
+                     : $_class . '::' . camelize($k));
+    $self->{$k} = $sub_class->new($self, $class_config);
+  }
 }
 
 1;

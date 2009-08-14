@@ -6,6 +6,7 @@ use LWP::UserAgent;
 extends 'LinkSeeker::Getter';
 has agent => (is => 'rw', default => 'LinkSeeker version ' . LinkSeeker->VERSION);
 has header => (is => 'rw', isa => 'HashRef');
+has post_data => (is => 'rw', default => '');
 
 sub process {
   my $self = shift;
@@ -19,11 +20,16 @@ sub get {
   my $ua = LWP::UserAgent->new;
   $ua->agent($self->agent || 'LinkSeeker - ' . LinkSeeker->VERSION);
   if (my $h = $self->header) {
-    if ($h->{referer}) {
-      $ua->default_header(Referrer => $self->header->{referer});
+    if ($h->{referrer}) {
+      $ua->default_header(Referrer => $self->header->{referrer});
     }
   }
-  my $res = $ua->get($url);
+  my $res;
+  unless ($self->post_data) {
+    $res = $ua->get($url);
+  } else {
+    $res = $ua->post($url, Content => $self->post_data);
+  }
   if ($res->is_success) {
     return $res->content;
   } else {
