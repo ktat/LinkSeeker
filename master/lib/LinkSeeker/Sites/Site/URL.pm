@@ -12,7 +12,7 @@ override unique_name => sub {
   my ($self) = @_;
   my $url = $self->url;
   my $unique = $self->{unique_name};
-  if (my $re = $unique->{url}) {
+  if (my $re = $unique->{regexp}) {
     if ($url =~ m{$re}) {
       return $1;
     }
