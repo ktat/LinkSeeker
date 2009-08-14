@@ -11,7 +11,6 @@ extends 'LinkSeeker::Base';
 has ls      => (is => 'rw', isa => 'LinkSeeker');
 has url     => (is => 'rw');
 has nest    => (is => 'rw');
-has from    => (is => 'rw');
 has name    => (is => 'rw');
 has parent_site  => (is => 'rw', isa => 'LinkSeeker::Sites::Site');
 has parent_class => (is => 'rw');
