@@ -1,5 +1,5 @@
 --- 
-# perl -I../lib -Ilib  -e 'use News; my $ls = News->new(file => ["news.yml"]); $ls->run'
+# perl -I../lib -Ilib -MNews -e 'News->new(file => ["news.yml"])->run'
 
 prior_stored : 1
 # This is same as the above
@@ -26,7 +26,6 @@ sites:
         # nikkei_news_category is method name defined in the Class(News).
         # if method return array ref,  same number of url is to be target.
         category: nikkei_news_category
-      post_data: 'hoge=1&fuga=2'
     # use News::Nikkei as scraper
     scraper : Nikkei
     nest :
