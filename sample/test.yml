@@ -1,0 +1,30 @@
+--- 
+# perl -I../lib -Ilib -MNews -e 'News->new(file => ["test.yml"])->run'
+
+prior_stored : 0
+# This is same as the above
+# prior_stored : ['html', 'data']
+
+getter :
+  # use LinkSeeker::Getter::LWP as getter
+  class: LWP
+  agent: HogeHoge
+  header:
+    Referer: FUGAFUGAFUGAUFGA
+html_store :
+  # use LinkSeeker::HtmlStore::Fiel as html_store
+  class: File
+  path : data/src
+
+sites:
+  hoge:
+    url : http://rwds.net/cgi-bin/env.cgi
+    scraper: Dummy
+    nest :
+      hogehoge:
+        url :
+          base:  http://rwds.net/cgi-bin/env.cgi
+          agent: FugaFugaFugaFuga
+          header:
+            Referer: HOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGE
+        scraper: Dummy
