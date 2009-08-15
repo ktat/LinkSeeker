@@ -26,12 +26,10 @@ sub nikkei_main_list {
 sub nikkei_news_detail {
   my ($self, $src) = @_;
   my $scraper = scraper {
-    process 'h3.topNews-ttl3';
     process 'h3.topNews-ttl3', 'title' => 'TEXT';
     process 'div.article-cap', 'content' => 'TEXT';
   };
-  my $result = $scraper->scrape(\$src);
-  return $result;
+  return $scraper->scrape(\$src);
 }
 
 1;

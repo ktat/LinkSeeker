@@ -79,7 +79,8 @@ override scraper => sub {
   my $scraper = super();
   my $parent_site = $self->parent_site;
   if (!$scraper and !$parent_site) {
-    Carp::croak($self->name . " doesn't  have scraper setting and parent_site neither.");
+    warn($self->name . " doesn't  have scraper setting and parent_site neither.\n");
+    return;
   }
   until ($scraper) {
     if ($scraper = $parent_site->scraper) {

@@ -157,17 +157,22 @@ sub get_scraped_data {
   if ($prior_stored_data and defined $data_store and $data_store->has_data($name, $unique_name)) {
     return $data_store->fetch_data($name, $unique_name);
   }
-  my $scraper_method = $site->scraper_method;
-  my $data = $scraper->$scraper_method($src);
+  my $data;
+  if (defined $scraper) {
+    my $scraper_method = $site->scraper_method;
+    $data = $scraper->$scraper_method($src);
+  }
 
   # data_store
-  if (defined $data and $data) {
-    $data_store->store_data($name, $unique_name, $data);
-  } elsif ($data_store->has_data($name, $unique_name)) {
-    $data = $data_store->fetch_data($name, $unique_name);
-  }
-  if (ref $data eq 'HASH') {
-    $data->{_source_url} = $url->url;
+  if (defined $data_store) {
+    if (defined $data and $data) {
+      $data_store->store_data($name, $unique_name, $data);
+    } elsif ($data_store->has_data($name, $unique_name)) {
+      $data = $data_store->fetch_data($name, $unique_name);
+    }
+    if (ref $data eq 'HASH') {
+      $data->{_source_url} = $url->url;
+    }
   }
   return $data;
 }
