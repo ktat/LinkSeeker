@@ -99,27 +99,24 @@ sub seek_links {
         $site->parent_site($parent_site);
         my ($url) = $site->url;
         my $target = $url->from || 'link_seeker_url';
-        if (defined $url->url and $url->url) {
-          $data = $url->url;
-        } elsif (ref $target) {
+        if (ref $target) {
           my @urls;
           for my $t (@$target) {
             if (ref $data eq 'HASH') {
-              $data = $data->{$t};
+               push @urls, LinkSeeker::Sites::Site::URL->new(url => $data->{$t});
             } else {
               foreach my $d (@$data) {
                 push @urls, LinkSeeker::Sites::Site::URL->new(url => $d->{$t});
               }
             }
           }
-          $data = \@urls if @urls;
-        } elsif ($data->{$target}) {
-          $data = $data->{$target};
+          if (@urls) {
+            $site->url(\@urls);
+          }
+        } elsif (ref $data eq 'HASH' and $data->{$target}) {
+          $site->url($data->{$target});
         }
-        if (defined $data) {
-          $site->url($data);
-          $self->seek_links($site);
-        }
+        $self->seek_links($site);
       }
     }
   }

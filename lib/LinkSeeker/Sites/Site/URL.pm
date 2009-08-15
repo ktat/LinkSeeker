@@ -7,6 +7,8 @@ has base => (is => 'rw');
 has from => (is => 'rw');
 has post_data => (is => 'rw');
 has unique_name  => (is => 'rw');
+has header => (is => 'rw', isa => 'HashRef');
+has agent  => (is => 'rw',);
 
 override unique_name => sub {
   my ($self) = @_;

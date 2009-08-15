@@ -94,12 +94,13 @@ override scraper => sub {
 override url => sub {
   my ($self) = @_;
   my $url = super();
+  my $config = {};
   if (ref $url eq 'HASH') {
-    my $config = $url;
+    $config = clone $url;
     $url = '';
-    my $base_url = $config->{base};
-    my $base_post_data = $config->{post_data} || '';
-    my $var = clone($config->{variables} || $self->ls->variables) || {};
+    my $base_url = delete $config->{base};
+    my $base_post_data = delete $config->{post_data} || '';
+    my $var = clone(delete $config->{variables} || $self->ls->variables) || {};
     my $num = 1;
     if (defined $var) {
       my $max = 0;
@@ -145,10 +146,10 @@ override url => sub {
       }
     }
     return @post_data
-      ? (map {LinkSeeker::Sites::Site::URL->new(url => $urls[$_], post_data => $post_data[$_], from => $config->{from})} 0 .. $#urls)
-      : (map {LinkSeeker::Sites::Site::URL->new(url => $_, from => $config->{from})} @urls);
+      ? (map {LinkSeeker::Sites::Site::URL->new(url => $urls[$_], post_data => $post_data[$_], %$config)} 0 .. $#urls)
+      : (map {LinkSeeker::Sites::Site::URL->new(url => $_, %$config)} @urls);
   } else {
-    return map {LinkSeeker::Sites::Site::URL->new(url => $_)} (ref $url ? @{$url} : $url);
+    return map {LinkSeeker::Sites::Site::URL->new(url => $_, %$config)} (ref $url ? @{$url} : $url);
   }
 };
 

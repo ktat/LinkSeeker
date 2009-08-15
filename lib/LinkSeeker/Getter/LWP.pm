@@ -20,11 +20,9 @@ sub get {
   warn "get $url\n";
 
   my $ua = LWP::UserAgent->new;
-  $ua->agent($self->agent || 'LinkSeeker - ' . LinkSeeker->VERSION);
-  if (my $h = $self->header) {
-    if ($h->{referrer}) {
-      $ua->default_header(Referrer => $self->header->{referrer});
-    }
+  $ua->agent($url_obj->agent || $self->agent || 'LinkSeeker - ' . LinkSeeker->VERSION);
+  if (my $h = $url_obj->header || $self->header) {
+    $ua->default_header(%$h);
   }
   my $res;
   unless ($post_data || $self->post_data) {
