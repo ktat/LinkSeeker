@@ -6,8 +6,9 @@ use Time::HiRes ();
 
 extends 'LinkSeeker::Base';
 
-has tmp_path => (is => 'rw');
-has sleep    => (is => 'rw');
+has tmp_path  => (is => 'rw');
+has sleep     => (is => 'rw');
+has variables => (is => 'rw', isa => 'Scalar');
 
 our $VERSION;
 
@@ -31,9 +32,10 @@ sub BUILDARGS {
                 prior_stored => 0,
                 tmp_path     => $ENV{TMP_DIR},
                 sleep        => 1,
+                variables    => '',
                );
   my $prior_stored = 0;
-  my @mk_objects;
+  my $mk_objects;
   if (my $file = delete $opt{file} || '') {
     my $files =  ref $file ? $file : [$file];
     my $cfgs = Config::Any->load_files({files => $files, use_ext => 1});
@@ -48,9 +50,9 @@ sub BUILDARGS {
         $option{$k} = delete $config{$k};
       }
     }
-    push @mk_objects, [\%config, \%opt];
+    $mk_objects = [\%config, \%opt];
   }
-  return { %opt, %option, mk_objects => \@mk_objects };
+  return { %opt, %option, mk_objects => $mk_objects };
 }
 
 sub run {
@@ -188,7 +190,6 @@ LSSample.pm
 
  package LSSample;
  
- use LSSample::Scraper;
  use Any::Moose;
  extends 'LinkSeeker';
  
@@ -247,14 +248,14 @@ site.yml
         # use LSSample::Scraper::shop_list method as scraper
         scraper : shop_list
         unique_name :
-          url: /([^/]+)$
+          regexp: /([^/]+)$
         nest:
           # write here site setting without url.
           # url is scraperd by parent site data
           shop_detail:
             from: shop_urls
             uniuqe_name :
-              url: /([^/]+)$
+              regexp: /([^/]+)$
             # use LSSample::Scraper::shop_detail method as scraper
             scraper: shop_detail
 
@@ -271,19 +272,29 @@ lssample.pl
  # only selected site
  LSSample->new(file =>['site.yml'])->run('pref_list', ...);
 
-You can find source html under ...
+You can find source html under the following directory
 
- data/src/pref_list
- data/src/shop_list
- data/src/shop_detail
+ data/src/pref_list/
+ data/src/shop_list/
+ data/src/shop_detail/
 
-You can find scraped data under ...
+You can find scraped data under the following directory
 
- data/scraped/pref_list
- data/scraped/shop_list
- data/scraped/shop_detail
+ data/scraped/pref_list/
+ data/scraped/shop_list/
+ data/scraped/shop_detail/
 
 =head1 DESCRIPTION
+
+When you scrape web pages, don't you do the following steps?
+
+1. get web page
+2. (store web page to file)
+3. scrape web page
+4. (store scraped data to file)
+5. insert scraped data to somewhere(file/db)
+
+Some of the steps are common work.
 
 =head1 METHODS
 
@@ -337,15 +348,21 @@ Do scraping.
 as key, you can use any name(^\w+$).
 as value, see SITE SETTING
 
-=head3 SITE SETTING
+=head2 SITE SETTING
 
 =head3 html_store
 
 as same as first layer html_store
 
+If you don't set this in site section,
+the one in first layer is used.
+
 =head3 data_store
 
-as same as first layer data_store
+as same as first layer data_store.
+
+If you don't set this in site section,
+the one in first layer is used.
 
 =head3 scraper
 
@@ -356,6 +373,9 @@ or class name and method name is as same as any_name in SITES SETTING.
 
 If its value is started from Capital letter, it is regareded as class name.
 
+If you don't set this in site section,
+the one in parent layer is used.
+
 =head3 data_filter
 
     data_filter : data_filter
@@ -364,6 +384,60 @@ data filter method name(class is YourPakcage::DataFilter)
 or class name and method name is as same as any_name in SITES SETTING.
 
 If its value is started from Capital letter, it is regareded as class name.
+
+
+=head3 url
+
+    url : http://example.com/
+
+or
+
+    url :
+      base:  http://example.com/$variable
+
+See URL SETTING.
+
+=head2 URL SETTING
+
+=head3 unique_name
+
+ unique_name
+   regexp : /([^/]+)$
+
+to determine unique name of URL.
+the matched is used for the name.
+
+=head3 variables
+
+ variables :
+   variable_name : method_name
+
+
+$variable_name can be used in url string.
+method_name should be defined your root class inheriting LinkSeeker.
+
+for example, In site setting:
+
+ one_site:
+   url :
+     base : http://www.example.com/$category
+     variables :
+       category : target_category
+
+in YourClass.pm
+
+ sub target_category {
+   return ['main', 'economy', 'sports'];
+ }
+
+LinkSeeker scrape the following urls.
+
+ http://www.example.com/main
+ http://www.example.com/economy
+ http://www.example.com/sports
+
+This variables setting can be written in first layer.
+But, in first layer, don't return multiple value.
 
 =head1 COPYRIGHT & LICENSE
 

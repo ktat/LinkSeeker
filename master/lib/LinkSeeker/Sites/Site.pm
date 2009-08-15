@@ -22,11 +22,11 @@ sub BUILDARGS {
   my $o_class = $opt->{parent_class} = (ref $link_seeker) || $link_seeker;
   $opt->{parent_object} = $link_seeker;
   die "not an object" unless ref $link_seeker;
-  my @mk_objects;
 
-  foreach my $class (qw/data_store html_store getter/) {
+  my %mk_objects;
+  foreach my $class (qw/data_store html_store getter data_filter/) {
     if (exists $opt->{$class}) {
-      push @mk_objects, [{$class => delete $opt->{$class}}];
+      $mk_objects{$class} = delete $opt->{$class};
     }
   }
 
@@ -56,7 +56,7 @@ sub BUILDARGS {
     $opt->{data_filter} = $class->new;
     $opt->{data_filter_method} ||= $method;
   }
-  return {%$opt, mk_objects => \@mk_objects}
+  return {%$opt, mk_objects => [\%mk_objects]};
 }
 
 override data_filter => sub {
@@ -99,7 +99,7 @@ override url => sub {
     $url = '';
     my $base_url = $config->{base};
     my $base_post_data = $config->{post_data} || '';
-    my $var = clone($config->{variables});
+    my $var = clone($config->{variables} || $self->ls->variables);
     my $num = 1;
     if (defined $var) {
       my $max = 0;

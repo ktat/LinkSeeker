@@ -23,6 +23,8 @@ has file        => (is => 'rw', default => '');
 
 has prior_stored => (is => 'rw');
 
+has variables => (is => 'rw');
+
 sub prior_stored_html {
   my ($self) = @_;
   my $stored = $self->prior_stored;
@@ -37,10 +39,7 @@ sub prior_stored_data {
 
 sub BUILD {
   my ($self, $opt) = @_;
-  my $mk_objects = delete $opt->{mk_objects};
-  foreach my $setting (@{$mk_objects || []}) {
-    $self->_mk_object(@$setting);
-  }
+  $self->_mk_object(@{delete $opt->{mk_objects} || []});
   return $self;
 }
 
