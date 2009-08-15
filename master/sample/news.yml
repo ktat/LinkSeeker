@@ -37,4 +37,4 @@ sites:
           from: news_detail_url
           unique_name :
             # generate unique name from the part of URL.
-            url: /([^/]+)\.html$
+            regexp: /([^/]+)\.html$
