@@ -99,7 +99,7 @@ override url => sub {
     $url = '';
     my $base_url = $config->{base};
     my $base_post_data = $config->{post_data} || '';
-    my $var = clone($config->{variables} || $self->ls->variables);
+    my $var = clone($config->{variables} || $self->ls->variables) || {};
     my $num = 1;
     if (defined $var) {
       my $max = 0;

@@ -8,7 +8,6 @@ extends 'LinkSeeker::Base';
 
 has tmp_path  => (is => 'rw');
 has sleep     => (is => 'rw');
-has variables => (is => 'rw', isa => 'Scalar');
 
 our $VERSION;
 
