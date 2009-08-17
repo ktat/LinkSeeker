@@ -29,7 +29,7 @@ sub BUILDARGS {
   my ($class, %opt) = @_;
   my %option = (
                 prior_stored => 0,
-                tmp_path     => $ENV{TMP_DIR},
+                tmp_path     => $ENV{TMPDIR},
                 sleep        => 1,
                 variables    => '',
                );
@@ -49,6 +49,10 @@ sub BUILDARGS {
         $option{$k} = delete $config{$k};
       }
     }
+    $config{cookie_store} ||= {
+                         class => 'File',
+                         path  => $option{tmp_path}
+                        };
     $mk_objects = [\%config, \%opt];
   }
   return { %opt, %option, mk_objects => $mk_objects };
@@ -103,10 +107,10 @@ sub seek_links {
           my @urls;
           for my $t (@$target) {
             if (ref $data eq 'HASH') {
-               push @urls, LinkSeeker::Sites::Site::URL->new(url => $data->{$t});
+               push @urls, LinkSeeker::Sites::Site::URL->new(ls => $self, url => $data->{$t});
             } else {
               foreach my $d (@$data) {
-                push @urls, LinkSeeker::Sites::Site::URL->new(url => $d->{$t});
+                push @urls, LinkSeeker::Sites::Site::URL->new(ls => $self, url => $d->{$t});
               }
             }
           }
@@ -175,6 +179,27 @@ sub get_scraped_data {
     }
   }
   return $data;
+}
+
+sub cookie {
+  my ($self, $url, @cookies) = @_;
+  $self->{urls} ||= {};
+  $self->{urls}->{$url} = 1;
+  my $stored_cookie = $self->{cookie_store}->fetch_cookie($url);
+
+  # if @cookies is passed, it is time to store cookie.
+  # @cookies is cookie string
+  if (@cookies) {
+    if (my $cookies = LinkSeeker::Cookies->parse($url, @cookies)) {
+      if ($stored_cookie) {
+        $stored_cookie->merge_cookie($cookies);
+      } else {
+        $stored_cookie = $cookies;
+      }
+      $self->{cookie_store}->store_cookie($url, $stored_cookie);
+    }
+  }
+  return $self->{cookie} = $stored_cookie;
 }
 
 1;

@@ -2,12 +2,9 @@ package LinkSeeker::DataStore;
 
 use Any::Moose;
 
-has store => (is => 'rw', default => '');
+extends "LinkSeeker::SubClassBase";
 
-sub BUILDARGS {
-  my ($self, $class, $store_info) = @_;
-  { class => $class, %$store_info };
-}
+has store => (is => 'rw', default => '');
 
 sub fetch_data {
   warn "store_data should be implemented in sub-class";

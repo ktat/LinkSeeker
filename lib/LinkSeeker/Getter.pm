@@ -2,11 +2,8 @@ package LinkSeeker::Getter;
 
 use Any::Moose;
 
-has store => (is => 'rw', default => '');
+extends "LinkSeeker::SubClassBase";
 
-sub BUILDARGS {
-  my ($self, $class, $getter_info) = @_;
-  { class => $class, %$getter_info };
-}
+has store => (is => 'rw', default => '');
 
 1;

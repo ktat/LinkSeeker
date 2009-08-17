@@ -1,6 +1,7 @@
 package LinkSeeker::Sites::Site::URL;
 
 use Any::Moose;
+use LinkSeeker::Cookies;
 
 has url => (is => 'rw');
 has base => (is => 'rw');
@@ -9,6 +10,7 @@ has post_data => (is => 'rw');
 has unique_name  => (is => 'rw');
 has header => (is => 'rw', isa => 'HashRef');
 has agent  => (is => 'rw',);
+has ls => (is => 'rw');
 
 override unique_name => sub {
   my ($self) = @_;

@@ -4,6 +4,7 @@ use Any::Moose;
 use LWP::UserAgent;
 
 extends 'LinkSeeker::Getter';
+
 has agent => (is => 'rw', default => 'LinkSeeker version ' . LinkSeeker->VERSION);
 has header => (is => 'rw', isa => 'HashRef');
 has post_data => (is => 'rw', default => '');
@@ -19,9 +20,18 @@ sub get {
   my ($url, $post_data) = ($url_obj->url, $url_obj->post_data);
   warn "get $url\n";
 
+  my $cookie = $self->ls->cookie($url);
+
+  my $h = $url_obj->header || $self->header;
   my $ua = LWP::UserAgent->new;
+
   $ua->agent($url_obj->agent || $self->agent || 'LinkSeeker - ' . LinkSeeker->VERSION);
-  if (my $h = $url_obj->header || $self->header) {
+
+  if (defined $cookie and my $c = $cookie->as_request_string($url)) {
+    $h->{'Cookie'} = $c;
+  }
+
+  if ($h) {
     $ua->default_header(%$h);
   }
   my $res;
@@ -31,6 +41,8 @@ sub get {
     $res = $ua->post($url, Content => $post_data || $self->post_data);
   }
   if ($res->is_success) {
+    my @cookies = $res->header('Set-Cookie');
+    $self->ls->cookie($url, @cookies);
     return $res->content;
   } else {
     return;
