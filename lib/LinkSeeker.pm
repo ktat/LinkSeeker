@@ -96,7 +96,7 @@ sub seek_links {
     if (my $data_filter = $site->data_filter) {
       my $unique_name = $url->unique_name;
       my $method = $site->data_filter_method || $site->name;
-      $data_filter->$method($unique_name, $url->url, $data);
+      $data = $data_filter->$method($unique_name, $url->url, $data);
     }
     $result{$site->name}{$url->unique_name} = $data;
     if (my $nest = $site->nest) {

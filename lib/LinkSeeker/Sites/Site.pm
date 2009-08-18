@@ -24,7 +24,7 @@ sub BUILDARGS {
   die "not an object" unless ref $link_seeker;
 
   my %mk_objects;
-  foreach my $class (qw/data_store html_store getter data_filter/) {
+  foreach my $class (qw/data_store html_store getter/) {
     if (exists $opt->{$class}) {
       $mk_objects{$class} = delete $opt->{$class};
     }
