@@ -125,7 +125,7 @@ sub seek_links {
         } elsif (ref $data eq 'HASH' and $data->{$target}) {
           $site->url($data->{$target});
         }
-        $self->seek_links($site);
+        %result = (%result, %{$self->seek_links($site)});
       }
     }
   }
