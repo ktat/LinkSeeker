@@ -66,19 +66,22 @@ sub run {
     die "sites method returns undefine value.\ncheck your configuration:\n";
   }
 
+  my %results;
   my %tmp;
   @tmp{@target_site} = ();
   while (my $site = $sites->next_site) {
     if (!@target_site or exists $tmp{$site->name}) {
       $site->ls($self);
-      $self->seek_links($site);
+      %results = (%results, %{$self->seek_links($site)});
     }
   }
+  return \%results;
 }
 
 sub seek_links {
   my ($self, $site) = @_;
   my @url_list;
+  my %result;
   unless (@url_list = $site->stored_url) {
     @url_list = $site->url;
     $site->store_url(\@url_list);
@@ -95,6 +98,7 @@ sub seek_links {
       my $method = $site->data_filter_method || $site->name;
       $data_filter->$method($unique_name, $url->url, $data);
     }
+    $result{$site->name}{$url->unique_name} = $data;
     if (my $nest = $site->nest) {
       my $child_sites = LinkSeeker::Sites->new($self, $nest);
       my $parent_site = $site;
@@ -104,6 +108,7 @@ sub seek_links {
         my ($url) = $site->url;
         my $target = $url->from || 'link_seeker_url';
         if (ref $target) {
+          # ignore when I remember why impmenet
           my @urls;
           for my $t (@$target) {
             if (ref $data eq 'HASH') {
@@ -125,6 +130,7 @@ sub seek_links {
     }
   }
   $site->delete_stored_url;
+  return \%result;
 }
 
 sub get_html_src {
