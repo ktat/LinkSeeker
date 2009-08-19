@@ -109,11 +109,16 @@ override url => sub {
         my $v = $var->{$k};
         my $_max;
         if (ref $v) {
+          # hoge: [1,2,3 ...]
           $_max = scalar @{[($v->[0] .. $v->[1])]};
         } elsif ($self->parent_object->can($v)) {
+          # hoge: method_name
           $v = $self->parent_object->$v;
           $_max = ref $v eq 'ARRAY' ? scalar @$v : 1;
           $var->{$k} = {var => $v};
+        } else {
+          # hoge: variable -> $hoge = 'variable'
+          $_max = 1;
         }
         $max = $_max if $max < $_max;
       }
