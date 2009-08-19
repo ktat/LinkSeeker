@@ -16,24 +16,49 @@ sub store_cookie {
   if (!-d $path) {
     mkdir $path or die "cannot create directory: " . $path;
   }
-  write_file($self->_file_name($url), join "\n", @{$cookies->as_response_string});
+  my %cookies;
+  foreach my $cookie (@{$cookies->cookies}) {
+    push @{$cookies{$self->_file_name($url, $cookie->domain)} ||= []}, $cookie->as_response_string;
+  }
+  foreach my $file (keys %cookies) {
+    next unless $file;
+    $self->ls->info("cookie is written to: $file");
+    write_file($file, join "\n", @{$cookies{$file}});
+  }
   return $cookies;
 }
 
 sub fetch_cookie {
   my ($self, $url) = @_;
-  my $f = $self->_file_name($url);
-  if (my $cookies = -e $f ? scalar slurp($f) : '') {
-    return LinkSeeker::Cookies->parse($url, split /[\r\n]/, $cookies);
+  my @files;
+  if (opendir my $dir, $self->path) {
+    my ($domain) = $url =~m{^https?://([^/]+)};
+    foreach my $file (grep !/^\.\.?$/, readdir $dir) {
+      if ($domain =~m{\Q$file\E}) {
+	push @files, join '/', $self->path, $file;
+      }
+    }
   }
-  return;
+  push @files, $self->_file_name($url);
+  my $cookies = '';
+  foreach my $f (@files) {
+    if (my $cookie = -e $f ? scalar slurp($f) : '') {
+      $cookies .= $cookie;
+    }
+  }
+  if ($cookies) {
+    return LinkSeeker::Cookies->parse($url, split /[\r\n]/, $cookies);
+  } else {
+    return;
+  }
 }
 
 sub _file_name {
-  my ($self, $url) = @_;
-  my ($domain) = $url =~m{^https?://([^/]+)};
+  my ($self, $url, $domain) = @_;
+  ($domain) = $url =~m{^https?://([^/]+)} unless $domain;
   my $path = $self->path eq $ENV{TMPDIR} ? $self->path . '/link_seeker' : $self->path;
-  return join '/', $path, $domain;
+  my $f = join '/', $path, $domain;
+  return $f;
 }
 
 1;

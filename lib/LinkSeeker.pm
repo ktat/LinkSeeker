@@ -8,6 +8,9 @@ extends 'LinkSeeker::Base';
 
 has tmp_path  => (is => 'rw');
 has sleep     => (is => 'rw');
+has http_proxy => (is => 'rw');
+has proxy_user => (is => 'rw');
+has proxy_password => (is => 'rw');
 
 our $VERSION;
 
@@ -15,6 +18,14 @@ BEGIN {
   $VERSION = 0.01;
   use Module::Pluggable require => 1, search_path => ['LinkSeeker'], inner => 0;
   __PACKAGE__->plugins;
+  foreach my $method (qw/info warn error debug/) {
+    no strict 'refs';
+    *{__PACKAGE__ . '::' . $method} = sub {
+      my ($self, $message) = @_;
+      $self->{log}->$method($message)
+        if defined $self->{log};
+    }
+  }
 }
 
 sub import {
@@ -32,6 +43,9 @@ sub BUILDARGS {
                 tmp_path     => $ENV{TMPDIR},
                 sleep        => 1,
                 variables    => '',
+                http_proxy     => '',
+                proxy_user     => '',
+                proxy_password => '',
                );
   my $prior_stored = 0;
   my $mk_objects;
@@ -53,6 +67,10 @@ sub BUILDARGS {
                          class => 'File',
                          path  => $option{tmp_path}
                         };
+    $config{log} ||= {
+                      class => 'Stderr',
+                      level => 0,
+                     };
     $mk_objects = [\%config, \%opt];
   }
   return { %opt, %option, mk_objects => $mk_objects };
@@ -90,7 +108,8 @@ sub seek_links {
     my $src = $self->get_html_src($site, $url);
     next unless $src;
     my $data = $self->get_scraped_data($site, $url, $src);
-    next unless $data;
+    #
+    # next unless $data;
     # data_filter
     #  insert data to DB? do anything as you like
     if (my $data_filter = $site->data_filter) {
@@ -107,8 +126,8 @@ sub seek_links {
         $site->parent_site($parent_site);
         my ($url) = $site->url;
         my $target = $url->from || 'link_seeker_url';
+        # ignore when I remember why impmenet
         if (ref $target) {
-          # ignore when I remember why impmenet
           my @urls;
           for my $t (@$target) {
             if (ref $data eq 'HASH') {
@@ -123,7 +142,14 @@ sub seek_links {
             $site->url(\@urls);
           }
         } elsif (ref $data eq 'HASH' and $data->{$target}) {
-          $site->url($data->{$target});
+          my $target_url = $data->{$target};
+          $self->debug("url is gotten from $target: $target_url");
+          if (ref $url) {
+            $url->url($target_url);
+          } else {
+            $url = $target_url;
+          }
+          $site->url($url);
         }
         %result = (%result, %{$self->seek_links($site)});
       }
@@ -191,7 +217,6 @@ sub cookie {
   $self->{urls} ||= {};
   $self->{urls}->{$url} = 1;
   my $stored_cookie = $self->{cookie_store}->fetch_cookie($url);
-
   # if @cookies is passed, it is time to store cookie.
   # @cookies is cookie string
   if (@cookies) {

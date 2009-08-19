@@ -40,7 +40,7 @@ sub BUILDARGS {
       $class  = $o_class . '::' . 'Scraper';
       $method = $class_or_method;
     }
-    $opt->{scraper} = $class->new;
+    $opt->{scraper} = $class->new($link_seeker, {});
     $opt->{scraper_method} ||= $method;
   }
   if (my $class_or_method = $opt->{data_filter}) {
@@ -53,7 +53,7 @@ sub BUILDARGS {
       $class  = $o_class . '::' . 'DataFilter';
       $method = $class_or_method == 1 ? $opt->{name} : $class_or_method;
     }
-    $opt->{data_filter} = $class->new;
+    $opt->{data_filter} = $class->new($link_seeker, {});
     $opt->{data_filter_method} ||= $method;
   }
   return {%$opt, mk_objects => [\%mk_objects]};
@@ -79,7 +79,7 @@ override scraper => sub {
   my $scraper = super();
   my $parent_site = $self->parent_site;
   if (!$scraper and !$parent_site) {
-    warn($self->name . " doesn't  have scraper setting and parent_site neither.\n");
+    $self->ls->warn($self->name . " doesn't  have scraper setting and parent_site neither.");
     return;
   }
   until ($scraper) {
@@ -96,7 +96,7 @@ override url => sub {
   my ($self) = @_;
   my $url = super();
   my $config = {};
-  if (ref $url eq 'HASH') {
+  if (ref $url eq 'HASH' or ref $url eq 'LinkSeeker::Sites::Site::URL') {
     $config = clone $url;
     $url = '';
     my $base_url = delete $config->{base};
@@ -113,7 +113,7 @@ override url => sub {
           $_max = scalar @{[($v->[0] .. $v->[1])]};
         } elsif ($self->parent_object->can($v)) {
           # hoge: method_name
-          $v = $self->parent_object->$v;
+          $v = $self->parent_object->$v || '';
           $_max = ref $v eq 'ARRAY' ? scalar @$v : 1;
           $var->{$k} = {var => $v};
         } else {
@@ -143,10 +143,12 @@ override url => sub {
       my $post_data = $post_data[$i];
       foreach my $key (@var_keys) {
         if (ref $key_value{$key} eq 'ARRAY') {
-          $urls[$i] =~ s{\$\{?$key\}?}{$key_value{$key}[$i]}g;
+          $self->ls->debug("assign $key: $key_value{$key}[$i]");
+          $urls[$i] =~ s{\$\{?$key\}?}{$key_value{$key}[$i]}g      if $urls[$i];
           $post_data[$i] =~ s{\$\{?$key\}?}{$key_value{$key}[$i]}g if $base_post_data;
         } else {
-          $urls[$i] =~ s{\$\{?$key\}?}{$key_value{$key}}g;
+          $self->ls->debug("assign $key: $key_value{$key}");
+          $urls[$i] =~ s{\$\{?$key\}?}{$key_value{$key}}g      if $urls[$i];
           $post_data[$i] =~ s{\$\{?$key\}?}{$key_value{$key}}g if $base_post_data;
         }
       }

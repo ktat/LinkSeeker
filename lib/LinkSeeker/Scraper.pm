@@ -1,6 +1,7 @@
 package LinkSeeker::Scraper;
 
 use Any::Moose;
+use LinkSeeker::SubClassBase;
 
 # has scraper => (is => 'rw', default => '', type => );
 # sub BUILDARGS {

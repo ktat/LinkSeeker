@@ -18,7 +18,7 @@ sub parse {
   my %self;
   foreach my $k (qw/path domain expires/) {
     if (exists $cookie{$k}) {
-      $self{$k} = $cookie{$k}->value;
+      ($self{$k}) = $cookie{$k}->value;
       delete $cookie{$k};
     }
   }
@@ -36,9 +36,9 @@ sub is_apply {
   $strict ||= 0;
 
   my ($target_domain) = ref $self->domain ? @{$self->domain} : $self->domain;
-  if ($url =~s{^http://([^/]+)}{}) {
+  if ($url =~s{^https?://([^/]+)}{}) {
     my $domain = $1;
-    return if $domain !~/$target_domain$/;
+    return if $domain !~/\Q$target_domain\E$/;
   } else {
     return;
   }
@@ -46,7 +46,7 @@ sub is_apply {
   my ($target_path) = ref $self->path ? @{$self->path} : $self->path;
   return unless $url =~/^$target_path/;
   my ($expires) = ref $self->expires ?  @{$self->expires} : $self->expires;
-  if (defined $expires) {
+  if (defined $expires and str2time($expires)) {
     my $now = DateTime->now;
     $expires = DateTime->from_epoch(epoch => str2time($expires));
 
