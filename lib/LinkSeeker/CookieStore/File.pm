@@ -42,7 +42,7 @@ sub fetch_cookie {
   push @files, $self->_file_name($url);
   my $cookies = '';
   foreach my $f (@files) {
-    if (my $cookie = -e $f ? scalar slurp($f) : '') {
+    if (my $cookie = -f $f ? scalar slurp($f) : '') {
       $cookies .= $cookie;
     }
   }

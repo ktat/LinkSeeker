@@ -3,6 +3,7 @@ package LinkSeeker;
 use Any::Moose;
 use Config::Any;
 use Time::HiRes ();
+use Clone qw/clone/;
 
 extends 'LinkSeeker::Base';
 
@@ -145,11 +146,16 @@ sub seek_links {
           my $target_url = $data->{$target};
           $self->debug("url is gotten from $target: $target_url");
           if (ref $url) {
-            $url->url($target_url);
+            my @urls;
+            foreach my $url_string (ref $target_url ? @$target_url : $target_url) {
+              push @urls, clone $url;
+              $urls[-1]->url($url_string);
+            }
+            $site->url(\@urls);
           } else {
             $url = $target_url;
+            $site->url($url);
           }
-          $site->url($url);
         }
         %result = (%result, %{$self->seek_links($site)});
       }
