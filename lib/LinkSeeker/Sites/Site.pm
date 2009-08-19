@@ -2,6 +2,7 @@ package LinkSeeker::Sites::Site;
 
 use Any::Moose;
 use File::Slurp qw/slurp write_file/;
+use String::CamelCase qw/camelize/;
 use Clone qw/clone/;
 use LinkSeeker::Sites::Site::URL;
 use Data::Dumper;
@@ -19,9 +20,8 @@ has parent_object => (is => 'rw');
 sub BUILDARGS {
   my ($class, $link_seeker, $opt) = @_;
   $opt->{ls} = $link_seeker;
-  my $o_class = $opt->{parent_class} = (ref $link_seeker) || $link_seeker;
+  my $o_class = $opt->{parent_class} = ref $link_seeker or die "LinkSeeker object is not passed";
   $opt->{parent_object} = $link_seeker;
-  die "not an object" unless ref $link_seeker;
 
   my %mk_objects;
   foreach my $class (qw/data_store html_store getter/) {
@@ -29,32 +29,20 @@ sub BUILDARGS {
       $mk_objects{$class} = delete $opt->{$class};
     }
   }
-
-  if (my $class_or_method = $opt->{scraper}) {
-    my ($class, $method);
-    if ($class_or_method =~/^[A-Z]/) {
-      # it is class and method name is site_name
-      $class  = $o_class . '::' . $class_or_method;
-      $method = $opt->{name};
-    } else {
-      $class  = $o_class . '::' . 'Scraper';
-      $method = $class_or_method;
+  foreach my $kind (qw/scraper data_filter/) {
+    if (my $class_or_method = $opt->{$kind}) {
+      my ($class, $method);
+      if ($class_or_method =~/^[A-Z]/) {
+        # it is class and method name is site_name
+        $class  = $o_class . '::' . $class_or_method;
+        $method = $opt->{name};
+      } else {
+        $class  = $o_class . '::' . camelise($kind);
+        $method = $class_or_method == 1 ? $opt->{name} : $class_or_method;
+      }
+      $opt->{$kind} = $class->new($link_seeker, {});
+      $opt->{$kind . '_method'} ||= $method;
     }
-    $opt->{scraper} = $class->new($link_seeker, {});
-    $opt->{scraper_method} ||= $method;
-  }
-  if (my $class_or_method = $opt->{data_filter}) {
-    my ($class, $method);
-    if ($class_or_method =~/^[A-Z]/) {
-      # it is class and method name is site_name
-      $class  = $o_class . '::' . $class_or_method;
-      $method = $opt->{name};
-    } else {
-      $class  = $o_class . '::' . 'DataFilter';
-      $method = $class_or_method == 1 ? $opt->{name} : $class_or_method;
-    }
-    $opt->{data_filter} = $class->new($link_seeker, {});
-    $opt->{data_filter_method} ||= $method;
   }
   return {%$opt, mk_objects => [\%mk_objects]};
 }
@@ -124,9 +112,9 @@ override url => sub {
       }
       $num = $max if $max;
     }
-    my @urls = ($base_url) x $num;
+    my @urls      = ($base_url) x $num;
     my @post_data = ($base_post_data) x $num;
-    my @var_keys = keys %$var;
+    my @var_keys  = keys %$var;
     my %key_value;
     foreach my $key (@var_keys) {
       my $v = $var->{$key};

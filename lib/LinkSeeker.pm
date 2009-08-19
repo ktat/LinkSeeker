@@ -144,7 +144,7 @@ sub seek_links {
           }
         } elsif (ref $data eq 'HASH' and $data->{$target}) {
           my $target_url = $data->{$target};
-          $self->debug("url is gotten from $target: $target_url");
+          $self->debug("url is gotten from $target: " . join (", ", ref $target_url ? @$target_url : $target_url));
           if (ref $url) {
             my @urls;
             foreach my $url_string (ref $target_url ? @$target_url : $target_url) {

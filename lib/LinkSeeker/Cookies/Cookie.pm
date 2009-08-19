@@ -35,7 +35,7 @@ sub is_apply {
   my ($self, $url, $strict) = @_;
   $strict ||= 0;
 
-  my ($target_domain) = ref $self->domain ? @{$self->domain} : $self->domain;
+  my $target_domain = $self->domain;
   if ($url =~s{^https?://([^/]+)}{}) {
     my $domain = $1;
     return if $domain !~/\Q$target_domain\E$/;
@@ -43,14 +43,18 @@ sub is_apply {
     return;
   }
 
-  my ($target_path) = ref $self->path ? @{$self->path} : $self->path;
+  my $target_path = $self->path;
   return unless $url =~/^$target_path/;
-  my ($expires) = ref $self->expires ?  @{$self->expires} : $self->expires;
-  if (defined $expires and str2time($expires)) {
-    my $now = DateTime->now;
-    $expires = DateTime->from_epoch(epoch => str2time($expires));
-
-    return if $now > $expires;
+  my $expires = $self->expires;
+  if (defined $expires) {
+    $expires =~s{(\d{4}) ([A-Z]+$)}{$2 $1};
+    if (my $epoch = str2time($expires)) {
+      my $now = DateTime->now;
+      $expires = DateTime->from_epoch(epoch => $epoch);
+      return if $now > $expires;
+    } else {
+      warn('cannot parse http-date string: ' . $expires);
+    }
   } elsif ($strict) {
     return 0;
   }
@@ -77,7 +81,7 @@ sub as_response_string {
   $c->name($self->name);
   $c->value($self->value);
   foreach my $m (qw/domain path expires/) {
-    $c->$m(ref $self->$m ? @{$self->$m} : $self->$m);
+    $c->$m($self->$m);
   }
   return $c->as_string;
 }

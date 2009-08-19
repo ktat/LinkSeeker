@@ -11,7 +11,9 @@ sub BUILDARGS {
   my ($self, $linkseeker, $sites_info) = @_;
   my @sites;
   foreach my $site (keys %$sites_info) {
-    push @sites, LinkSeeker::Sites::Site->new($linkseeker, {name => $site, %{$sites_info->{$site}}});
+    push @sites, LinkSeeker::Sites::Site->new
+      ($linkseeker, {name => $site, %{$sites_info->{$site}}});
+    $linkseeker->debug('site object is created: ' . $sites[-1]->name);
   }
   return {sites => \@sites};
 }

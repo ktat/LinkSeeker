@@ -15,7 +15,9 @@ has ls => (is => 'rw', isa => 'LinkSeeker');
 override unique_name => sub {
   my ($self) = @_;
   my $url = $self->url;
+
   my $unique = $self->{unique_name};
+
   if (ref $unique) {
     if (my $re = $unique->{regexp}) {
       if (my @matches = $url =~ m{$re}) {

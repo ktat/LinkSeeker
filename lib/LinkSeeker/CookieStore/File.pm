@@ -42,8 +42,9 @@ sub fetch_cookie {
   push @files, $self->_file_name($url);
   my $cookies = '';
   foreach my $f (@files) {
-    if (my $cookie = -f $f ? scalar slurp($f) : '') {
-      $cookies .= $cookie;
+    if (-f $f and ! -z $f) {
+      $self->ls->info("cookie is read from: $f");
+      $cookies .= scalar slurp($f)
     }
   }
   if ($cookies) {
@@ -57,8 +58,7 @@ sub _file_name {
   my ($self, $url, $domain) = @_;
   ($domain) = $url =~m{^https?://([^/]+)} unless $domain;
   my $path = $self->path eq $ENV{TMPDIR} ? $self->path . '/link_seeker' : $self->path;
-  my $f = join '/', $path, $domain;
-  return $f;
+  return join '/', $path, $domain;
 }
 
 1;
