@@ -168,8 +168,7 @@ sub get_scraped_data {
     return $data_store->fetch_data($name, $unique_name);
   }
   my $data;
-  if (defined $scraper) {
-    my $scraper_method = $site->scraper_method;
+  if (defined $scraper and my $scraper_method = $site->scraper_method) {
     $data = $scraper->$scraper_method($src);
   }
 

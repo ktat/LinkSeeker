@@ -3,7 +3,7 @@ package LinkSeeker::Sites;
 use Data::Dumper;
 use Any::Moose;
 
-has url_count => (is => 'rw', default => 0, isa => 'Int');
+has site_count => (is => 'rw', default => 0, isa => 'Int');
 has sites     => (is => 'rw', default => sub {[]});
 has ls        => (is => 'rw', isa => 'LinkSeeker');
 
@@ -18,10 +18,20 @@ sub BUILDARGS {
 
 sub next_site {
   my $self = shift;
-  my $count = $self->url_count;
-  my $site = $self->sites->[$count++];
-  $self->url_count($count);
-  return $site;
+  my $count = $self->site_count;
+  if (@{$self->sites} == $count) {
+    $self->site_count(0);
+    return;
+  } else {
+    my $site = $self->sites->[$count];
+    $self->site_count(++$count);
+    return $site;
+  }
+}
+
+sub reset_site_count {
+  my ($self) = shift;
+  $self->sites->site_count(0);
 }
 
 1;

@@ -17,9 +17,12 @@ override unique_name => sub {
   my $url = $self->url;
   my $unique = $self->{unique_name};
   if (my $re = $unique->{regexp}) {
-    if ($url =~ m{$re}) {
-      return $1;
+    if (my @matches = $url =~ m{$re}) {
+      return join "", @matches;
     }
+  } elsif ($re = $unique->{variable}) {
+    $re =~s/^\$//;
+    return $self->ls->$re;
   }
   return $url;
 };
