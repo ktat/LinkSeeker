@@ -10,12 +10,6 @@ has header => (is => 'rw', isa => 'HashRef');
 has post_data => (is => 'rw', default => '');
 has method => (is => 'rw', default => 'get');
 
-sub process {
-  my $self = shift;
-  my ($site_info, $data) = @_;
-  print Data::Dumper::Dumper($site_info);
-}
-
 sub BUILD {
   my ($self) = @_;
   if (my $proxy = $self->ls->http_proxy) {
