@@ -37,8 +37,8 @@ sub BUILDARGS {
         $class  = $o_class . '::' . $class_or_method;
         $method = $opt->{name};
       } else {
-        $class  = $o_class . '::' . camelise($kind);
-        $method = $class_or_method == 1 ? $opt->{name} : $class_or_method;
+        $class  = $o_class . '::' . camelize($kind);
+        $method = $class_or_method ? $opt->{name} : $class_or_method;
       }
       $opt->{$kind} = $class->new($link_seeker, {});
       $opt->{$kind . '_method'} ||= $method;
