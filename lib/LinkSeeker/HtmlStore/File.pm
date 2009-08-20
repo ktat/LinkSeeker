@@ -18,7 +18,7 @@ sub store_content {
     mkdir $path;
   }
   my $file_name = join '/', $path, uri_escape($name_or_url);
-  $self->ls->info("html is written to: $file_name");
+  $self->ls->debug("html is written to: $file_name");
   write_file($file_name, $src);
 }
 
@@ -26,7 +26,7 @@ sub fetch_content {
   my ($self, $name, $name_or_url) = @_;
   my $path = join '/', $self->path, $name;
   my $file_name = join '/', $path, uri_escape($name_or_url);
-  $self->ls->info("html is read from: $file_name");
+  $self->ls->debug("html is read from: $file_name");
   return scalar slurp($file_name);
 }
 

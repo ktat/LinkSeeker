@@ -22,7 +22,7 @@ sub store_cookie {
   }
   foreach my $file (keys %cookies) {
     next unless $file;
-    $self->ls->info("cookie is written to: $file");
+    $self->ls->debug("cookie is written to: $file");
     write_file($file, join "\n", @{$cookies{$file}});
   }
   return $cookies;
@@ -43,7 +43,7 @@ sub fetch_cookie {
   my $cookies = '';
   foreach my $f (@files) {
     if (-f $f and ! -z $f) {
-      $self->ls->info("cookie is read from: $f");
+      $self->ls->debug("cookie is read from: $f");
       $cookies .= scalar slurp($f)
     }
   }

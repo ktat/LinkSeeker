@@ -90,6 +90,7 @@ sub run {
   @tmp{@target_site} = ();
   while (my $site = $sites->next_site) {
     if (!@target_site or exists $tmp{$site->name}) {
+      $self->info("start linkseeker for: ". $site->name);
       $site->ls($self);
       %results = (%results, %{$self->seek_links($site)});
     }
@@ -109,16 +110,12 @@ sub seek_links {
     my $src = $self->get_html_src($site, $url);
     next unless $src;
     my $data = $self->get_scraped_data($site, $url, $src);
-    #
-    # next unless $data;
-    # data_filter
-    #  insert data to DB? do anything as you like
-    if (my $data_filter = $site->data_filter) {
-      my $unique_name = $url->unique_name;
+    my $unique_name = $url->unique_name;
+    if (defined $data and my $data_filter = $site->data_filter) {
       my $method = $site->data_filter_method || $site->name;
       $data = $data_filter->$method($unique_name, $url->url, $data);
     }
-    $result{$site->name}{$url->unique_name} = $data;
+    $result{$site->name}{$unique_name} = $data;
     if (my $nest = $site->nest) {
       my $child_sites = LinkSeeker::Sites->new($self, $nest);
       my $parent_site = $site;
