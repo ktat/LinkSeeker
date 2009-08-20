@@ -31,15 +31,10 @@ sub BUILDARGS {
   }
   foreach my $kind (qw/scraper data_filter/) {
     if (my $class_or_method = $opt->{$kind}) {
-      my ($class, $method);
-      if ($class_or_method =~/^[A-Z]/) {
-        # it is class and method name is site_name
-        $class  = $o_class . '::' . $class_or_method;
-        $method = $opt->{name};
-      } else {
-        $class  = $o_class . '::' . camelize($kind);
-        $method = $class_or_method ? $opt->{name} : $class_or_method;
-      }
+      my ($class, $method) = $class_or_method =~/^[A-Z]/
+                              ? ($class_or_method, $opt->{name})
+                              : (camelize($kind), ($class_or_method =~/^1$/ ? $opt->{name} : $class_or_method));
+      $class = $o_class . '::' . $class;
       $opt->{$kind} = $class->new($link_seeker, {});
       $opt->{$kind . '_method'} ||= $method;
     }

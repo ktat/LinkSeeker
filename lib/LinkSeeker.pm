@@ -444,7 +444,6 @@ or class name and method name is as same as any_name in SITES SETTING.
 
 If its value is started from Capital letter, it is regareded as class name.
 
-
 =head3 url
 
     url : http://example.com/
@@ -469,11 +468,12 @@ the matched is used for the name.
 =head3 variables
 
  variables :
-   variable_name : method_name
+   variable_name : method_name_or_value
 
 
 $variable_name can be used in url string.
-method_name should be defined your root class inheriting LinkSeeker.
+If method_name is defined your root class inheriting LinkSeeker, it is called.
+If not defined, it is just replaced from $variables_name to "method_name_or_value".
 
 for example, In site setting:
 
