@@ -2,18 +2,13 @@
 # perl -I../lib -Ilib -MLSSample -e 'LSSample->new(file => ["mixi.yml"])->run'
 
 log:
-  level: debug
-  class: Stderr
+  level: info
 
 prior_stored : 0
 
 getter :
   class: LWP
   agent: "LinkSeeker - mixi scraper"
-
-html_store :
-  class: File
-  path : data/src
 
 variables:
   email: input_your_email
@@ -30,5 +25,8 @@ sites:
           base:  http://mixi.jp/check.pl?n=%2Fhome.pl
         nest:
           mixi_echo:
+            html_store:
+              class: File
+              path : data/src
             url: http://mixi.jp/recent_echo.pl
 
