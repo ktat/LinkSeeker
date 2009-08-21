@@ -62,7 +62,7 @@ override scraper => sub {
   my $scraper = super();
   my $parent_site = $self->parent_site;
   if (!$scraper and !$parent_site) {
-    $self->ls->warn($self->name . " doesn't  have scraper setting and parent_site neither.");
+    $self->ls->info($self->name . " doesn't  have scraper setting and parent_site neither.");
     return;
   }
   until ($scraper) {
