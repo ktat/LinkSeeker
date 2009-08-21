@@ -1,7 +1,7 @@
 --- 
-# perl -I../lib -Ilib -MNews -e 'News->new(file => ["test.yml"])->run'
+# perl -I../lib -Ilib -MLSSample -e 'LSSample->new(file => ["test.yml"])->run'
 
-prior_stored : 0
+prior_stored : 1
 # This is same as the above
 # prior_stored : ['html', 'data']
 
@@ -11,15 +11,19 @@ getter :
   agent: HogeHoge
   header:
     Referer: FUGAFUGAFUGAUFGA
-html_store :
-  # use LinkSeeker::HtmlStore::Fiel as html_store
-  class: File
-  path : data/src
+
+log:
+  class: Stderr
+  level: debug
+
+#html_store :
+#  # use LinkSeeker::HtmlStore::Fiel as html_store
+#  class: File
+#  path : data/src
 
 sites:
   hoge:
     url : http://rwds.net/cgi-bin/env.cgi
-    scraper: Dummy
     nest :
       hogehoge:
         url :
@@ -27,4 +31,10 @@ sites:
           agent: FugaFugaFugaFuga
           header:
             Referer: HOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGE
-        scraper: Dummy
+        nest :
+          hogehogehoge:
+            url :
+              base:  http://rwds.net/cgi-bin/env.cgi
+              agent: FugaFugaFugaFuga
+              header:
+                Referer: HOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGEHOGE

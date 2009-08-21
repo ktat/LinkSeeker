@@ -1,10 +1,10 @@
-package News::Nikkei;
+package LSSample::Nikkei;
 
 use Any::Moose;
 
 use Web::Scraper;
 
-my $base_url = 'http://www.nikkei.co.jp';
+my $nikkei_url = 'http://www.nikkei.co.jp';
 
 sub nikkei_main_list {
   my ($self, $src) = @_;
@@ -16,8 +16,8 @@ sub nikkei_main_list {
   my $top_news = delete $result->{top_news_detail_url};
   unshift @{$result->{news_detail_url}}, @$top_news;
   for my $url (@{$result->{news_detail_url}}) {
-    if ($url !~ /^$base_url/) {
-      $url = $url =~m{^/} ?  $base_url . $url : $base_url .'/'. $url;
+    if ($url !~ /^$nikkei_url/) {
+      $url = $url =~m{^/} ?  $nikkei_url . $url : $nikkei_url .'/'. $url;
     }
   }
   return $result;

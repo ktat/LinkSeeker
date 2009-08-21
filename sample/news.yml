@@ -1,5 +1,5 @@
 --- 
-# perl -I../lib -Ilib -MNews -e 'News->new(file => ["news.yml"])->run'
+# perl -I../lib -Ilib -MLSSample -e 'LSSample->new(file => ["news.yml"])->run'
 
 prior_stored : 1
 # This is same as the above
@@ -16,6 +16,13 @@ html_store :
   # use LinkSeeker::HtmlStore::Fiel as html_store
   class: File
   path : data/src
+cookie_store:
+  class: File
+  path : data/cookie
+
+log:
+  class: Stderr
+  level: debug
 
 sites:
   nikkei_main_list:
