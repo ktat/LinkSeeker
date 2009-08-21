@@ -29,7 +29,7 @@ sub input_your_password {
 
   return $self->stash->{password} if $self->stash->{password};
 
-  print "!!! password is displied as is\n";
+  print "!!! password is displayed as is\n";
   print "input your password: ";
   $| = 1;
   my $var = <>;
