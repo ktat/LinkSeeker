@@ -64,14 +64,12 @@ sub BUILDARGS {
         $option{$k} = delete $config{$k};
       }
     }
-    $config{cookie_store} ||= {
-                         class => 'File',
-                         path  => $option{tmp_path}
-                        };
-    $config{log} ||= {
-                      class => 'Stderr',
-                      level => 0,
-                     };
+    $config{cookie_store}          ||= {path  => $option{tmp_path}};
+    $config{cookie_store}->{class} ||= 'File';
+    $config{log}                   ||= {level => 0};
+    $config{log}->{class}          ||= 'Stderr';
+    $config{getter}                ||= {class => 'LWP'};
+
     $mk_objects = [\%config, \%opt];
   }
   return { %opt, %option, mk_objects => $mk_objects };
@@ -425,24 +423,31 @@ the one in first layer is used.
 
 =head3 scraper
 
-    scraper : pref_list
+This takes 3 kind of value.
 
-scraper method name(class is YourPakcage::Scraper)
-or class name and method name is as same as any_name in SITES SETTING.
+    scraper: method_name
+    # started from Capital letter, it is regareded as class name.
+    scraper: ClassName
+    scraper: 1
 
-If its value is started from Capital letter, it is regareded as class name.
+If you write method_name, it should be defined in YourClass::Scraper.
+If you write ClassName, method name is site name in ClassName class.
+If you write 1, medhod name is site name and class name is YourCalss::Scraper.
 
-If you don't set this in site section,
-the one in parent layer is used.
+If you don't set this in site section, the one in parent layer is used.
 
 =head3 data_filter
 
-    data_filter : data_filter
+    data_filter: method_name
+    # started from Capital letter, it is regareded as class name.
+    data_filter: ClassName
+    data_filter: 1
 
-data filter method name(class is YourPakcage::DataFilter)
-or class name and method name is as same as any_name in SITES SETTING.
+If you write method_name, it should be defined in YourClass::DataFilter.
+If you write ClassName, method name is site name in ClassName class.
+If you write 1, medhod name is site name and class name is YourCalss::DataFilter.
 
-If its value is started from Capital letter, it is regareded as class name.
+If you don't set this in site section, the one in root layer is used.
 
 =head3 url
 
@@ -452,6 +457,7 @@ or
 
     url :
       base:  http://example.com/$variable
+      ...
 
 See URL SETTING.
 
@@ -465,11 +471,16 @@ See URL SETTING.
 to determine unique name of URL.
 the matched is used for the name.
 
+If you want to use variable for unique_name.
+You can write as the following.
+
+ unique_name:
+  variable: $unique_name
+
 =head3 variables
 
  variables :
    variable_name : method_name_or_value
-
 
 $variable_name can be used in url string.
 If method_name is defined your root class inheriting LinkSeeker, it is called.
@@ -497,6 +508,10 @@ LinkSeeker scrape the following urls.
 
 This variables setting can be written in first layer.
 But, in first layer, don't return multiple value.
+
+=head1 SEE ALSO
+
+see LinkSeeker::Manual::Cookbook for detail.
 
 =head1 COPYRIGHT & LICENSE
 

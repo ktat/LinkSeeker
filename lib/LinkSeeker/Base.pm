@@ -52,7 +52,7 @@ sub _mk_object {
     my $sub_class = ($class_config->{'class'}
                      ? $_class . '::' . camelize($k) . '::' . $class_config->{'class'}
                      : $_class . '::' . camelize($k));
-    $self->{$k} = $sub_class->new($self, $class_config);
+    $self->{$k} = $sub_class->new($self->isa('LinkSeeker') ? $self : $self->ls, $class_config);
   }
 }
 

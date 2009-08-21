@@ -18,10 +18,10 @@ has parent_class => (is => 'rw');
 has parent_object => (is => 'rw');
 
 sub BUILDARGS {
-  my ($class, $link_seeker, $opt) = @_;
-  $opt->{ls} = $link_seeker;
-  my $o_class = $opt->{parent_class} = ref $link_seeker or die "LinkSeeker object is not passed";
-  $opt->{parent_object} = $link_seeker;
+  my ($class, $linkseeker, $opt) = @_;
+  $opt->{ls} = $linkseeker;
+  my $o_class = $opt->{parent_class} = ref $linkseeker or die "LinkSeeker object is not passed";
+  $opt->{parent_object} = $linkseeker;
 
   my %mk_objects;
   foreach my $class (qw/data_store html_store getter/) {
@@ -35,11 +35,11 @@ sub BUILDARGS {
                               ? ($class_or_method, $opt->{name})
                               : (camelize($kind), ($class_or_method =~/^1$/ ? $opt->{name} : $class_or_method));
       $class = $o_class . '::' . $class;
-      $opt->{$kind} = $class->new($link_seeker, {});
+      $opt->{$kind} = $class->new($linkseeker, {});
       $opt->{$kind . '_method'} ||= $method;
     }
   }
-  return {%$opt, mk_objects => [\%mk_objects]};
+  return {%$opt, ls => $linkseeker, mk_objects => [\%mk_objects]};
 }
 
 override data_filter => sub {

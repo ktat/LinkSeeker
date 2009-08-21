@@ -15,7 +15,7 @@ sub BUILDARGS {
       ($linkseeker, {name => $site, %{$sites_info->{$site}}});
     $linkseeker->debug('site object is created: ' . $sites[-1]->name);
   }
-  return {sites => \@sites};
+  return {ls => $linkseeker, sites => \@sites};
 }
 
 sub next_site {
