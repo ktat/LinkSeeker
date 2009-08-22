@@ -19,8 +19,7 @@ sub input_your_email {
   return $self->stash->{email} if $self->stash->{email};
 
   prompt ("input your email: ");
-  my $var = $_;
-  chomp $var;
+  chomp(my $var = $_);
   return $self->stash->{email} = $var;
 }
 
@@ -30,10 +29,8 @@ sub input_your_password {
   return $self->stash->{password} if $self->stash->{password};
 
   prompt("input your password: ", -e => '*');
-  my $var = $_;
-  chomp $var;
+  chomp(my $var = $_);
   return $self->stash->{password} = $var;
 }
 
 1;
-
