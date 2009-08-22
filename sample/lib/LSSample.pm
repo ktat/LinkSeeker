@@ -2,6 +2,7 @@ package LSSample;
 
 use Any::Moose;
 use lib qw(../lib);
+use IO::Prompt;
 
 has stash => (is => 'rw', default => sub {{}});
 
@@ -17,9 +18,8 @@ sub input_your_email {
 
   return $self->stash->{email} if $self->stash->{email};
 
-  print "input your email: ";
-  my $var = <>;
-  $| = 1;
+  prompt ("input your email: ");
+  my $var = $_;
   chomp $var;
   return $self->stash->{email} = $var;
 }
@@ -29,10 +29,8 @@ sub input_your_password {
 
   return $self->stash->{password} if $self->stash->{password};
 
-  print "!!! password is displayed as is\n";
-  print "input your password: ";
-  $| = 1;
-  my $var = <>;
+  prompt("input your password: ", -e => '*');
+  my $var = $_;
   chomp $var;
   return $self->stash->{password} = $var;
 }

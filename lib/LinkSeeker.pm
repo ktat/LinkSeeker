@@ -107,6 +107,7 @@ sub seek_links {
   foreach my $url (@url_list) {
     my $src = $self->get_html_src($site, $url);
     next unless $src;
+
     my $data = $self->get_scraped_data($site, $url, $src);
     my $unique_name = $url->unique_name;
     if (defined $data and my $data_filter = $site->data_filter) {

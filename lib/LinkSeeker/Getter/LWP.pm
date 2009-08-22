@@ -36,6 +36,7 @@ sub get {
   my $res = $self->_get($ua, $method, $url, $post_data, $header);
 
  GET: {
+    $self->ls->debug('response status: ' . $res->status_line);
     if ($res->is_success) {
       my @cookies = $res->header('Set-Cookie');
       $self->ls->info("receive cookie: " . $_) for @cookies;
@@ -48,6 +49,7 @@ sub get {
       $res = $self->_get($ua, 'get', $location, '', $header);
       redo GET;
     } else {
+      $self->ls->warn("cannot get content from: " . $url);
       return;
     }
   }

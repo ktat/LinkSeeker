@@ -139,7 +139,7 @@ override url => sub {
     return @post_data
       ? (map {LinkSeeker::Sites::Site::URL->new(ls => $self->ls, url => $urls[$_], post_data => $post_data[$_], %$config)} 0 .. $#urls)
       : (map {LinkSeeker::Sites::Site::URL->new(ls => $self->ls, url => $_, %$config)} @urls);
-  } elsif (ref $url and ref $url->[0] eq 'LinkSeeker::Sites::Site::URL') {
+  } elsif (ref $url eq 'ARRAY' and ref $url->[0] eq 'LinkSeeker::Sites::Site::URL') {
     return @$url;
   } else {
     return map {LinkSeeker::Sites::Site::URL->new(ls => $self->ls, url => $_, %$config)} (ref $url ? @{$url} : $url);
