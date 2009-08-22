@@ -4,29 +4,23 @@
 log:
   level: info
 
-prior_stored : 0
-
-getter :
-  class: LWP
-  agent: "LinkSeeker - mixi scraper"
-
 variables:
+  # method name or you can write your email address
   email: input_your_email
+  # method name or you can write your password
   password: input_your_password
+
+html_store:
+  path : data/src
 
 sites:
   mixi_login:
     url :
       base:  http://mixi.jp/login.pl
-      post_data: 'email=$email&password=$password&next_url=/home.pl'
-    nest :
-      mixi_home:
-        url :
-          base:  http://mixi.jp/check.pl?n=%2Fhome.pl
-        nest:
-          mixi_echo:
-            html_store:
-              class: File
-              path : data/src
-            url: http://mixi.jp/recent_echo.pl
-
+      post_data: 'email=$email&password=$password&next_url=%2Fhome.pl'
+    nest:
+      mixi_echo:
+        html_store:
+          class: File
+          path : data/src
+        url: http://mixi.jp/recent_echo.pl

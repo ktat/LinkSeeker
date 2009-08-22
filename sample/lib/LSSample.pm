@@ -3,6 +3,7 @@ package LSSample;
 use Any::Moose;
 use lib qw(../lib);
 use IO::Prompt;
+use CGI;
 
 has stash => (is => 'rw', default => sub {{}});
 
@@ -20,7 +21,7 @@ sub input_your_email {
 
   prompt ("input your email: ");
   chomp(my $var = $_);
-  return $self->stash->{email} = $var;
+  return $self->stash->{email} = CGI::escape($var);
 }
 
 sub input_your_password {
@@ -30,7 +31,7 @@ sub input_your_password {
 
   prompt("input your password: ", -e => '*');
   chomp(my $var = $_);
-  return $self->stash->{password} = $var;
+  return $self->stash->{password} = CGI:escape($var);
 }
 
 1;
