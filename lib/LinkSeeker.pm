@@ -13,6 +13,23 @@ has http_proxy => (is => 'rw');
 has proxy_user => (is => 'rw');
 has proxy_password => (is => 'rw');
 
+our %DEFAULT_CLASS_CONFIG =
+  (
+   required => {
+                getter => {class => 'LWP'},
+                cookie_store => {
+                                 class => 'File',
+                                 path  => $ENV{TMPDIR},
+                                },
+                log        => { class => 'Stderr'},
+               },
+   optional => {
+                html_store => { class => 'File'},
+                data_store => { class => 'Dumper'},
+                log        => { level => 'fatal'},
+               }
+  );
+
 our $VERSION;
 
 BEGIN {
@@ -40,39 +57,45 @@ sub import {
 sub BUILDARGS {
   my ($class, %opt) = @_;
   my %option = (
-                prior_stored => 0,
-                tmp_path     => $ENV{TMPDIR},
-                sleep        => 1,
-                variables    => '',
+                prior_stored   => 0,
+                tmp_path       => $ENV{TMPDIR},
+                sleep          => 1,
+                variables      => '',
                 http_proxy     => '',
                 proxy_user     => '',
                 proxy_password => '',
                );
   my $prior_stored = 0;
-  my $mk_objects;
+  my %config;
   if (my $file = delete $opt{file} || '') {
     my $files =  ref $file ? $file : [$file];
     my $cfgs = Config::Any->load_files({files => $files, use_ext => 1});
 
-    my %config;
     foreach my $f_cfg (@$cfgs) {
       my ($f, $cfg) = %{$f_cfg || {}};
       @config{keys %$cfg} = values %{$cfg};
     }
-    foreach my $k (keys %option) {
-      if (defined $config{$k}) {
-        $option{$k} = delete $config{$k};
+  } else {
+    %config = %opt;
+  }
+  foreach my $k (keys %option) {
+    if (defined $config{$k}) {
+      $option{$k} = delete $config{$k};
+    }
+  }
+
+  foreach my $type (qw/required optional/) {
+    while (my ($class, $class_config) = each %{$DEFAULT_CLASS_CONFIG{$type}}) {
+      if (defined $config{$class}) {
+        foreach my $key (keys %$class_config) {
+          $config{$class}->{$key} ||= $class_config->{$key};
+        }
+      } elsif ($type eq 'required') {
+        $config{$class} = clone $class_config;
       }
     }
-    $config{cookie_store}          ||= {path  => $option{tmp_path}};
-    $config{cookie_store}->{class} ||= 'File';
-    $config{log}                   ||= {level => 0};
-    $config{log}->{class}          ||= 'Stderr';
-    $config{getter}                ||= {class => 'LWP'};
-
-    $mk_objects = [\%config, \%opt];
   }
-  return { %opt, %option, mk_objects => $mk_objects };
+  return { %opt, %option, mk_objects => [\%config, \%opt] };
 }
 
 sub run {
@@ -107,7 +130,6 @@ sub seek_links {
   foreach my $url (@url_list) {
     my $src = $self->get_html_src($site, $url);
     next unless $src;
-
     my $data = $self->get_scraped_data($site, $url, $src);
     my $unique_name = $url->unique_name;
     if (defined $data and my $data_filter = $site->data_filter) {
