@@ -12,10 +12,6 @@ data_store :
   # use LinkSeeker::DataStore::Dumper as data_store
   class: Dumper 
   path : data/scraped
-html_store :
-  # use LinkSeeker::HtmlStore::Fiel as html_store
-  class: File
-  path : data/src
 cookie_store:
   class: File
   path : data/cookie
@@ -38,8 +34,12 @@ sites:
     nest :
       # scraping goes on ...
       nikkei_news_detail:
-        # target url is gotten from 'news_detail_url' of parent data.
+        html_store :
+          # use LinkSeeker::HtmlStore::File as html_store
+          class: File
+          path : data/src
         url:
+          # target url is gotten from 'news_detail_url' of parent data.
           from: news_detail_url
           unique_name :
             # generate unique name from the part of URL.
