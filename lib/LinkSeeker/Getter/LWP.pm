@@ -2,6 +2,7 @@ package LinkSeeker::Getter::LWP;
 
 use Any::Moose;
 use LWP::UserAgent;
+use URI;
 
 extends 'LinkSeeker::Getter';
 
@@ -33,6 +34,7 @@ sub get {
   $ua->agent($url_obj->agent || $self->agent || 'LinkSeeker - ' . LinkSeeker->VERSION);
 
   my $res = $self->_get($ua, $method, $url, $post_data, $header);
+  my $base_url = $url;
 
  GET: {
     $self->ls->debug('response status: ' . $res->status_line);
@@ -44,6 +46,9 @@ sub get {
       return $content;
     } elsif ($res->is_redirect) {
       my $location = $res->headers->header('Location');
+      if ($location !~ /^http/) {
+        $location = URI->new_abs($location, $base_url);
+      }
       $self->ls->info("redirect to: " . $location);
       $res = $self->_get($ua, 'get', $location, '', $header);
       redo GET;
