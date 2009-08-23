@@ -59,3 +59,46 @@ sub remove_expires {
 }
 
 1;
+
+=pod
+
+=head1 NAME
+
+LinkSeeker::Cookies -  handling cookie (cheap implementation)
+
+=head1 METHOD
+
+=head2 parse
+
+ $c->parse($url, @cookie_strings);
+
+=head2 cookies
+
+ $c->cookies(\@cookies_objects)
+
+store LinkSeeker::Cookies::Cookie objects.
+
+=head2 as_request_string
+
+ $c->as_request_string($url);
+
+=head2 as_response_string
+
+ $c->as_response_string;
+
+=head2 merge_cookie
+
+ $c->merge_cookie($new_cookie);
+
+=head2 remove_expires
+
+ $c->remove_expires($url);
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2009 Ktat, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut

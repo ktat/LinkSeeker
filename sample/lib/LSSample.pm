@@ -31,7 +31,7 @@ sub input_your_password {
 
   prompt("input your password: ", -e => '*');
   chomp(my $var = $_);
-  return $self->stash->{password} = CGI:escape($var);
+  return $self->stash->{password} = CGI::escape($var);
 }
 
 1;

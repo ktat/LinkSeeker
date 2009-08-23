@@ -21,7 +21,6 @@ WriteMakefile(
 	'Config::Any' => 0,
 	'Time::HiRes' => 0,
 	'HTTP::Date' => 0,
-	
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'LinkSeeker-*' },

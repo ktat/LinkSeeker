@@ -123,14 +123,15 @@ sub seek_links {
   my ($self, $site) = @_;
   my @url_list;
   my %result;
-  unless (@url_list = $site->stored_url) {
-    @url_list = $site->url;
-    $site->store_url(\@url_list);
-  }
+  @url_list = $site->url;
+  # unless (@url_list = $site->stored_url) {
+  #   @url_list = $site->url;
+  #   $site->store_url(\@url_list);
+  # }
   foreach my $url (@url_list) {
-    my $src = $self->get_html_src($site, $url);
+    my $src = $self->_get_html_src($site, $url);
     next unless $src;
-    my $data = $self->get_scraped_data($site, $url, $src);
+    my $data = $self->_get_scraped_data($site, $url, $src);
     my $unique_name = $url->unique_name;
     if (defined $data and my $data_filter = $site->data_filter) {
       my $method = $site->data_filter_method || $site->name;
@@ -179,11 +180,11 @@ sub seek_links {
       }
     }
   }
-  $site->delete_stored_url;
+  # $site->delete_stored_url;
   return \%result;
 }
 
-sub get_html_src {
+sub _get_html_src {
   my ($self, $site, $url) = @_;
   Carp::croak("url is required for " . $site->name) unless $url;
   my ($getter, $html_store) = ($site->getter || $self->getter, $site->html_store || $self->html_store);
@@ -208,7 +209,7 @@ sub get_html_src {
   return $src;
 }
 
-sub get_scraped_data {
+sub _get_scraped_data {
   my ($self, $site, $url, $src) = @_;
   my ($scraper, $data_store) = ($site->scraper, $site->data_store || $self->data_store);
   my $unique_name = $url->unique_name;
@@ -387,6 +388,41 @@ Some of the steps are common work.
  $ls->run;
 
 Do scraping.
+
+=head2 seek_links
+
+used in run method.
+recursively seek links.
+
+=head2 cookie
+
+to get cookie.
+
+ $cookies = $ls->cookie($url);
+
+to store cookie.
+
+ $ls->cookie($url, @cookies)
+
+=head2 fatal
+
+ $ls->fatal('fatal message');
+
+=head2 error
+
+ $ls->error('error message');
+
+=head2 warn
+
+ $ls->warn('warn message');
+
+=head2 info
+
+ $ls->info('info message');
+
+=head2 debug
+
+ $ls->debug('debug message');
 
 =head1 YAML FILE
 

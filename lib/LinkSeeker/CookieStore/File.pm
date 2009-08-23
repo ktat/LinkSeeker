@@ -35,7 +35,7 @@ sub fetch_cookie {
     my ($domain) = $url =~m{^https?://([^/]+)};
     foreach my $file (grep !/^\.\.?$/, readdir $dir) {
       if ($domain =~m{\Q$file\E}) {
-	push @files, join '/', $self->path, $file;
+        push @files, join '/', $self->path, $file;
       }
     }
   }
@@ -62,3 +62,30 @@ sub _file_name {
 }
 
 1;
+
+=pod
+
+=head1 NAME
+
+LinkSeeker::CookieStore::File
+
+=head1 SYNOPSYS
+
+ cookie_store
+   class: CookieStoreSubClass
+   option: value
+
+=head1 METHODS
+
+=head2 fetch_cookie
+
+=head2 store_cookie
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2009 Ktat, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut

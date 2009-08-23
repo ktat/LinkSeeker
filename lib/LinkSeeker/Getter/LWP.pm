@@ -8,7 +8,6 @@ extends 'LinkSeeker::Getter';
 has agent => (is => 'rw', default => 'LinkSeeker version ' . LinkSeeker->VERSION);
 has header => (is => 'rw', isa => 'HashRef');
 has post_data => (is => 'rw', default => '');
-has method => (is => 'rw', default => 'get');
 
 sub BUILD {
   my ($self) = @_;
@@ -25,7 +24,7 @@ sub BUILD {
 sub get {
   my ($self, $url_obj) = @_;
   my ($url, $post_data) = ($url_obj->url, $url_obj->post_data || $self->post_data);
-  my $method = $post_data ? 'post' : $self->method;
+  my $method = $post_data ? 'post' : $url_obj->method;
   my $ua = LWP::UserAgent->new;
   my $header = $url_obj->header || $self->header;
 
@@ -36,6 +35,7 @@ sub get {
   my $res = $self->_get($ua, $method, $url, $post_data, $header);
 
  GET: {
+    $self->ls->debug('response status: ' . $res->status_line);
     if ($res->is_success) {
       my @cookies = $res->header('Set-Cookie');
       $self->ls->info("receive cookie: " . $_) for @cookies;
@@ -48,6 +48,7 @@ sub get {
       $res = $self->_get($ua, 'get', $location, '', $header);
       redo GET;
     } else {
+      $self->ls->warn("cannot get content from: " . $url);
       return;
     }
   }
@@ -80,3 +81,32 @@ sub _create_header {
 }
 
 1;
+
+=pod
+
+=head1 NAME
+
+LinkSeeker::Getter::LWP
+
+=head1 SYNOPSYS
+
+ getter:
+   class: LWP
+   agent: user_agent
+   header:
+     Referer: http://...
+
+=head1 METHOD
+
+=head2 get
+
+ $getter->get($url_object);
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2009 Ktat, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut

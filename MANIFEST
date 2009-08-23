@@ -4,8 +4,8 @@ Makefile.PL
 README
 lib/LinkSeeker.pm
 t/00-load.t
-t/pod-coverage.t
 t/pod.t
+t/pod-coverage.t
 lib/LinkSeeker.pm
 lib/LinkSeeker/Base.pm
 lib/LinkSeeker/Sites.pm

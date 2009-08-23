@@ -19,3 +19,46 @@ sub has_data {
 }
 
 1;
+
+=pod
+
+=head1 NAME
+
+LinkSeeker::DataStore
+
+=head1 SYNOPSYS
+
+ data_store
+   class: DataStoreSubClass
+   option: value
+
+=head1 METHODS
+
+implement the following methods in sub class.
+
+=head2 fetch_data
+
+ $o->fetch_data($site_name, $unique_name);
+
+fetch stored data
+
+=head2 store_data
+
+ $o->has_data($site_name, $unique_name, $data)
+
+store fetched data
+
+=head2 has_data
+
+ $o->has_data($site_name, $unique_name)
+
+if having data, return 1 or 0;
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2009 Ktat, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut

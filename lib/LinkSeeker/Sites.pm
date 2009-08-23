@@ -37,3 +37,35 @@ sub reset_site_count {
 }
 
 1;
+
+=pod
+
+=head1 NAME
+
+LinkSeeker::Sites
+
+=head1 METHODS
+
+=head2 next_site
+
+ while (my $site = $sites->next_site) {
+   # ...
+ }
+
+if existing next site, return it and increment site count.
+if not existing next site, return undef and reset site count.
+So, you can use next site in another place, again.
+
+
+=head2 reset_site_count
+
+reset site count.
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2009 Ktat, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut

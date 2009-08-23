@@ -87,3 +87,44 @@ sub as_response_string {
 }
 
 1;
+
+=pod
+
+=head1 NAME
+
+LinkSeeker::Cookies::Cookie
+
+=head1 METHODS
+
+=head2 parse
+
+ $c->parse($url, $cookie_string);
+
+=head2 is_apply
+
+ $c->is_apply($url);
+
+check domain.
+
+=head2 is_apply_strict
+
+ $c->is_apply_strict($url);
+
+check domain and expires.
+
+=head2 as_request_string
+
+ $c->as_request_string;
+
+=head2 as_response_string
+
+ $c->as_response_string;
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2009 Ktat, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut

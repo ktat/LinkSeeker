@@ -139,38 +139,67 @@ override url => sub {
     return @post_data
       ? (map {LinkSeeker::Sites::Site::URL->new(ls => $self->ls, url => $urls[$_], post_data => $post_data[$_], %$config)} 0 .. $#urls)
       : (map {LinkSeeker::Sites::Site::URL->new(ls => $self->ls, url => $_, %$config)} @urls);
-  } elsif (ref $url and ref $url->[0] eq 'LinkSeeker::Sites::Site::URL') {
+  } elsif (ref $url eq 'ARRAY' and ref $url->[0] eq 'LinkSeeker::Sites::Site::URL') {
     return @$url;
   } else {
     return map {LinkSeeker::Sites::Site::URL->new(ls => $self->ls, url => $_, %$config)} (ref $url ? @{$url} : $url);
   }
 };
 
-sub stored_url {
-  return;
-  my ($self) = @_;
-  my $file_name = $self->ls->tmp_path . '/url_list.tmp';
-  if (-e $file_name and (-M $file_name) * 86400 < 36000) {
-    my $data = slurp($file_name);
-    $data = eval "$data";
-    return @$data;
-  }
-  return;
-}
-
-sub delete_stored_url {
-  return;
-  my ($self) = @_;
-  my $file_name = $self->ls->tmp_path . '/' . $self->name . 'url_list.tmp';
-  unlink $file_name;
-}
-
-sub store_url {
-  return;
-  my ($self, $urls) = @_;
-  my $file_name = $self->ls->tmp_path . '/' . $self->name . 'url_list.tmp';
-  local $Data::Dumper::Terse = 1;
-  write_file($file_name, Dumper($urls));
-}
+# sub stored_url {
+#   return;
+#   my ($self) = @_;
+#   my $file_name = $self->ls->tmp_path . '/url_list.tmp';
+#   if (-e $file_name and (-M $file_name) * 86400 < 36000) {
+#     my $data = slurp($file_name);
+#     $data = eval "$data";
+#     return @$data;
+#   }
+#   return;
+# }
+# 
+# sub delete_stored_url {
+#   return;
+#   my ($self) = @_;
+#   my $file_name = $self->ls->tmp_path . '/' . $self->name . 'url_list.tmp';
+#   unlink $file_name;
+# }
+# 
+# sub store_url {
+#   return;
+#   my ($self, $urls) = @_;
+#   my $file_name = $self->ls->tmp_path . '/' . $self->name . 'url_list.tmp';
+#   local $Data::Dumper::Terse = 1;
+#   write_file($file_name, Dumper($urls));
+# }
 
 1;
+
+=pod
+
+=head1 NAME
+
+LinkSeeker::Sites::Site
+
+=head1 METHODS
+
+=head2 data_filter
+
+ $site->data_filter;
+
+=head2 scraper
+
+ $site->scraper;
+
+=head2 url
+
+ $site->url;
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2009 Ktat, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut

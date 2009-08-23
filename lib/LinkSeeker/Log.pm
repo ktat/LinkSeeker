@@ -20,8 +20,8 @@ foreach my $level (keys %LOG_LEVEL) {
     my ($self, $message) = @_;
     if ($self->level >= $LOG_LEVEL{$level}) {
       $message = "[$lc_level] " . $message;
-      if ($self->can("do_log")) {
-        return $self->do_log($message);
+      if ($self->can("_do_log")) {
+        return $self->_do_log($message);
       } else {
         return $message;
       }
@@ -36,3 +36,47 @@ sub BUILDARGS {
 }
 
 1;
+
+=pod
+
+=head1 NAME
+
+LinkSeeker::Log
+
+=head1 METHOD
+
+=head2 fatal
+
+fatal message
+
+=head2 error
+
+error message
+
+=head2 warn
+
+warn message
+
+=head2 info
+
+info message
+
+=head2 debug
+
+debug message
+
+=head1 SYNOPSYS
+
+ log:
+   class: LogSubClass
+   level: debug
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2009 Ktat, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
+
