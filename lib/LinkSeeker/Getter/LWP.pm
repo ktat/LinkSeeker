@@ -49,6 +49,7 @@ sub get {
       if ($location !~ /^http/) {
         $location = URI->new_abs($location, $base_url);
       }
+      $base_url = $location;
       $self->ls->info("redirect to: " . $location);
       $res = $self->_get($ua, 'get', $location, '', $header);
       redo GET;
