@@ -135,6 +135,7 @@ sub seek_links {
     my $unique_name = $url->unique_name;
     if (defined $data and my $data_filter = $site->data_filter) {
       my $method = $site->data_filter_method;
+      $self->info("data filter with: " . ref($data_filter) . '->' . $method);
       $data = $data_filter->$method($unique_name, $url->url, $data);
     }
     $result{$site->name}{$unique_name} = $data;
