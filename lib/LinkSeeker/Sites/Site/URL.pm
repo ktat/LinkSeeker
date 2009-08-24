@@ -6,6 +6,7 @@ use LinkSeeker::Cookies;
 has url => (is => 'rw');
 has base => (is => 'rw');
 has from => (is => 'rw');
+# has match => (is => 'rw');
 has post_data => (is => 'rw');
 has unique_name  => (is => 'rw');
 has header => (is => 'rw', isa => 'HashRef');
@@ -15,7 +16,7 @@ has method => (is => 'rw', default => 'get');
 
 override unique_name => sub {
   my ($self) = @_;
-  my $url = $self->url;
+  my $url = $self->url or die "URL is empty!";
 
   my $unique = $self->{unique_name};
 

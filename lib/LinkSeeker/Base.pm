@@ -2,6 +2,7 @@ package LinkSeeker::Base;
 
 use Any::Moose;
 use String::CamelCase qw/camelize/;
+use Class::Inspector;
 
 has sites       => (is => 'rw',
                     isa => 'LinkSeeker::Sites');
@@ -45,14 +46,23 @@ sub BUILD {
 
 sub _mk_object {
   my ($self, $config, $opt) = @_;
-  my $_class = __PACKAGE__;
-  $_class =~s/::Base$//;
+  my $_class = 'LinkSeeker';
   foreach my $k (keys %$config) {
     my $class_config = $config->{$k};
     my $sub_class = ($class_config->{'class'}
                      ? $_class . '::' . camelize($k) . '::' . $class_config->{'class'}
                      : $_class . '::' . camelize($k));
-    $self->{$k} = $sub_class->new($self->isa('LinkSeeker') ? $self : $self->ls, $class_config);
+    if (Class::Inspector->loaded($sub_class)) {
+      $self->{$k} = $sub_class->new($self->isa('LinkSeeker') ? $self : $self->ls, $class_config);
+    } else {
+      my $ls_sub_class = 'LinkSeeker::' . camelize($k) . '::' . $class_config->{'class'};
+      if (Class::Inspector->loaded($ls_sub_class)) {
+        $class_config->{$k . '_method'} ||= 'process';
+        $self->{$k} = $ls_sub_class->new($self->isa('LinkSeeker') ? $self : $self->ls, $class_config);
+      } else {
+        Carp::croak("$ls_sub_class is not loaded.");
+      }
+    }
   }
 }
 

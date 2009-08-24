@@ -1,7 +1,10 @@
 package LinkSeeker::Scraper;
 
 use Any::Moose;
-use LinkSeeker::SubClassBase;
+
+extends "LinkSeeker::SubClassBase";
+
+has 'base_url' => (is => 'rw');
 
 1;
 
@@ -13,7 +16,7 @@ LinkSeeker::Scraper
 
 =head1 SYNOPSYS
 
- 
+ scraper:
    class: ScraperSubClass
    option: value
 

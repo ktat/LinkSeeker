@@ -7,8 +7,8 @@ use Clone qw/clone/;
 
 extends 'LinkSeeker::Base';
 
-has tmp_path  => (is => 'rw');
-has sleep     => (is => 'rw');
+has tmp_path   => (is => 'rw');
+has sleep      => (is => 'rw');
 has http_proxy => (is => 'rw');
 has proxy_user => (is => 'rw');
 has proxy_password => (is => 'rw');
@@ -134,7 +134,7 @@ sub seek_links {
     my $data = $self->_get_scraped_data($site, $url, $src);
     my $unique_name = $url->unique_name;
     if (defined $data and my $data_filter = $site->data_filter) {
-      my $method = $site->data_filter_method || $site->name;
+      my $method = $site->data_filter_method;
       $data = $data_filter->$method($unique_name, $url->url, $data);
     }
     $result{$site->name}{$unique_name} = $data;
@@ -146,7 +146,7 @@ sub seek_links {
         $site->parent_site($parent_site);
         my ($url) = $site->url;
         my $target = $url->from || 'link_seeker_url';
-        # ignore when I remember why impmenet
+        # ignore until I remember why imprement
         if (ref $target) {
           my @urls;
           for my $t (@$target) {
@@ -163,15 +163,21 @@ sub seek_links {
           }
         } elsif (ref $data eq 'HASH' and $data->{$target}) {
           my $target_url = $data->{$target};
-          $self->debug("url is gotten from $target: " . join (", ", ref $target_url ? @$target_url : $target_url));
           if (ref $url) {
+            my @target_urls = ref $target_url ? @$target_url : $target_url;
+            # if (defined (my $match = $url->match)) {
+            #   @target_urls = grep qr/$match/, @target_urls;
+            # }
+            $self->debug("url is gotten from $target: " . join(", ", @target_urls));
             my @urls;
-            foreach my $url_string (ref $target_url ? @$target_url : $target_url) {
-              push @urls, clone $url;
-              $urls[-1]->url($url_string);
+            foreach my $url_string (@target_urls) {
+              my $u = clone $url;
+              $u->url($url_string);
+              push @urls, $u;
             }
             $site->url(\@urls);
           } else {
+            $self->debug("url is gotten from $target: $target_url");
             $url = $target_url;
             $site->url($url);
           }
@@ -220,6 +226,7 @@ sub _get_scraped_data {
   }
   my $data;
   if (defined $scraper and my $scraper_method = $site->scraper_method) {
+    $scraper->base_url($url->url);
     $data = $scraper->$scraper_method($src);
   }
 

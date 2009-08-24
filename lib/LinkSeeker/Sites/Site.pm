@@ -6,6 +6,7 @@ use String::CamelCase qw/camelize/;
 use Clone qw/clone/;
 use LinkSeeker::Sites::Site::URL;
 use Data::Dumper;
+use Class::Inspector;
 
 extends 'LinkSeeker::Base';
 
@@ -31,11 +32,21 @@ sub BUILDARGS {
   }
   foreach my $kind (qw/scraper data_filter/) {
     if (my $class_or_method = $opt->{$kind}) {
-      my ($class, $method) = $class_or_method =~/^[A-Z]/
+      my ($class, $method);
+      my $class_config = {};
+      if (ref $class_or_method eq 'HASH') {
+        $class_config = $class_or_method;
+        $class_or_method = $class_or_method->{class};
+      }
+      ($class, $method) = $class_or_method =~/^[A-Z]/
                               ? ($class_or_method, $opt->{name})
                               : (camelize($kind), ($class_or_method =~/^1$/ ? $opt->{name} : $class_or_method));
-      $class = $o_class . '::' . $class;
-      $opt->{$kind} = $class->new($linkseeker, {});
+      my $sub_class = $o_class . '::' . $class;
+      unless (Class::Inspector->loaded($sub_class)) {
+        $sub_class = 'LinkSeeker::' . camelize($kind) . '::' . $class;
+        $method    = $class_config->{$kind . '_method'} || 'process';
+      }
+      $opt->{$kind} = $sub_class->new($linkseeker, $class_config);
       $opt->{$kind . '_method'} ||= $method;
     }
   }
@@ -45,12 +56,13 @@ sub BUILDARGS {
 override data_filter => sub {
   my ($self) = @_;
   my $data_filter = super();
-  if (my $ps = $self->parent_site) {
+  if (my $parent_site = $self->parent_site) {
     until ($data_filter) {
-      if ($data_filter = $ps->data_filter) {
-        $self->data_filter_method($self->name);
+      if ($data_filter = $parent_site->data_filter) {
+        my $method = (ref $data_filter) =~m{^LinkSeeker::} ? 'process' : $self->name;
+        $self->data_filter_method($method);
       } else {
-        $ps = $ps->parent_site or last;
+        $parent_site = $parent_site->parent_site or last;
       }
     }
   }
@@ -67,7 +79,8 @@ override scraper => sub {
   }
   until ($scraper) {
     if ($scraper = $parent_site->scraper) {
-      $self->scraper_method($self->name);
+      my $method = (ref $scraper) =~m{^LinkSeeker::} ? 'process' : $self->name;
+      $self->scraper_method($method);
     } else {
       $parent_site = $parent_site->parent_site or last;
     }
@@ -91,9 +104,11 @@ override url => sub {
       foreach my $k (keys %$var) {
         my $v = $var->{$k};
         my $_max;
-        if (ref $v) {
+        if (ref $v eq 'ARRAY' and ($v->[0] !~ /\D/ and $v->[1] !~ /\D/)) {
           # hoge: [1,2,3 ...]
           $_max = scalar @{[($v->[0] .. $v->[1])]};
+        } elsif (ref $v eq 'ARRAY') {
+          $_max = @$v;
         } elsif ($self->parent_object->can($v)) {
           # hoge: method_name
           $v = $self->parent_object->$v || '';
@@ -113,8 +128,10 @@ override url => sub {
     my %key_value;
     foreach my $key (@var_keys) {
       my $v = $var->{$key};
-      if (ref $v eq 'ARRAY') {
+      if (ref $v eq 'ARRAY' and ($v->[0] !~ /\D/ and $v->[1] !~ /\D/)) {
         $key_value{$key} = [$v->[0] .. $v->[1]];
+      } elsif (ref $v eq 'ARRAY') {
+        $key_value{$key} = [@$v];
       } elsif (ref $v eq 'HASH') {
         $key_value{$key} = $v->{var};
       } else {

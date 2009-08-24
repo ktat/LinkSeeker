@@ -4,6 +4,8 @@ use Any::Moose;
 
 use Web::Scraper;
 
+extends "LinkSeeker::Scraper";
+
 my $nikkei_url = 'http://www.nikkei.co.jp';
 
 sub nikkei_main_list {
