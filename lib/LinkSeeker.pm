@@ -147,16 +147,18 @@ sub seek_links {
         $site->parent_site($parent_site);
         my ($url) = $site->url;
         my $target = $url->from || 'link_seeker_url';
-        # ignore until I remember why imprement
         if (ref $target) {
+          my $_data = $data;
           my @urls;
-          for my $t (@$target) {
-            if (ref $data eq 'HASH') {
-               push @urls, LinkSeeker::Sites::Site::URL->new(ls => $self, url => $data->{$t});
-            } else {
-              foreach my $d (@$data) {
-                push @urls, LinkSeeker::Sites::Site::URL->new(ls => $self, url => $d->{$t});
-              }
+          foreach my $t (@{$target}[0 .. ($#{$target} - 1)]) {
+            $_data = $_data->{$t};
+          }
+          my $last = $target->[$#{$target}];
+          if (ref $_data eq 'HASH') {
+            push @urls, LinkSeeker::Sites::Site::URL->new(ls => $self, url => $_data->{$last});
+          } else {
+            foreach my $d (@$_data) {
+              push @urls, LinkSeeker::Sites::Site::URL->new(ls => $self, url => $d->{$last});
             }
           }
           if (@urls) {
