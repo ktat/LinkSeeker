@@ -35,7 +35,17 @@ override unique_name => sub {
   return $url;
 };
 
+sub clone {
+  my ($self) = @_;
+  my $ls = delete $self->{ls};
+  my $clone = Clone::clone($self);
+  $self->ls($ls);
+  $clone->ls($ls);
+  return $clone;
+}
+
 1;
+
 =pod
 
 =head1 NAME
@@ -48,9 +58,11 @@ LinkSeeker::Sites::Site::URL
 
  $url->unique_name;
 
-=head2 fetch_cookie
+=head2 clone
 
-=head2 store_cookie
+ my $cloned_url = $url->clone;
+
+clone URL object.
 
 =head1 COPYRIGHT & LICENSE
 

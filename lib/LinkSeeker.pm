@@ -174,7 +174,7 @@ sub seek_links {
             $self->debug("url is gotten from $target: " . join(", ", @target_urls));
             my @urls;
             foreach my $url_string (@target_urls) {
-              my $u = clone $url;
+              my $u = $url->clone;
               $u->url($url_string);
               push @urls, $u;
             }
