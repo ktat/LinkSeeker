@@ -1,2 +1,11 @@
 LinkSeeker - Perl module for web scraipting of nested links
 
+ToDo:
+
+finalize_data_filter for site setting
+
+site:
+  hogehoeg:
+    finalize_data_filter: <- 個別のdata_filter処理が終わった後に呼ばれる
+
+DataFilter

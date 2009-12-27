@@ -25,6 +25,8 @@ sub BUILD {
 sub get {
   my ($self, $url_obj) = @_;
   my ($url, $post_data) = ($url_obj->url, $url_obj->post_data || $self->post_data);
+  Carp::confess("url is needed") unless $url;
+
   my $method = $post_data ? 'post' : $url_obj->method;
   my $ua = LWP::UserAgent->new;
   my $header = $url_obj->header || $self->header;
@@ -62,6 +64,7 @@ sub get {
 
 sub _get {
   my ($self, $ua, $method, $url, $post_data, $h) = @_;
+
   my $res;
   my $header = $self->_create_header($url, $h);
   $ua->default_header(%$header) if %$header;

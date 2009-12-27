@@ -8,17 +8,23 @@ has base => (is => 'rw');
 has from => (is => 'rw');
 # has match => (is => 'rw');
 has post_data => (is => 'rw');
-has unique_name  => (is => 'rw');
+has _unique_name  => (is => 'rw');
 has header => (is => 'rw', isa => 'HashRef');
 has agent  => (is => 'rw',);
 has ls => (is => 'rw', isa => 'LinkSeeker');
 has method => (is => 'rw', default => 'get');
 
-override unique_name => sub {
-  my ($self) = @_;
+sub BUILDARGS {
+  my ($class, %opt) = @_;
+  $opt{_unique_name} = $opt{unique_name};
+  return \%opt;
+}
+
+sub unique_name {
+  my ($self, $data) = @_;
   my $url = $self->url or die "URL is empty!";
 
-  my $unique = $self->{unique_name};
+  my $unique = $self->_unique_name;
 
   if (ref $unique) {
     if (my $re = $unique->{regexp}) {
@@ -28,6 +34,8 @@ override unique_name => sub {
     } elsif ($re = $unique->{variable}) {
       $re =~s/^\$//;
       return $self->ls->$re;
+    } else {
+      # if having data and method is md5 return md5sum?
     }
   } elsif($unique) {
     return $unique;

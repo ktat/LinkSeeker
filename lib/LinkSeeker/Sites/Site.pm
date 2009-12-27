@@ -11,12 +11,12 @@ use Class::Inspector;
 extends 'LinkSeeker::Base';
 
 has ls      => (is => 'rw', isa => 'LinkSeeker');
-has url     => (is => 'rw');
 has nest    => (is => 'rw');
 has name    => (is => 'rw');
 has parent_site  => (is => 'rw', isa => 'LinkSeeker::Sites::Site');
 has parent_class => (is => 'rw');
 has parent_object => (is => 'rw');
+has _url => (is => 'rw');
 
 sub BUILDARGS {
   my ($class, $linkseeker, $opt) = @_;
@@ -50,10 +50,20 @@ sub BUILDARGS {
       $opt->{$kind . '_method'} ||= $method;
     }
   }
+  $opt->{_url} = $opt->{url};
   return {%$opt, ls => $linkseeker, mk_objects => [\%mk_objects]};
+  use Tie::Trace qw/watch/;
+  my %hoge;
+  %hoge = (%$opt, ls => $linkseeker, mk_objects => [\%mk_objects]);
+$hoge{_url} = $hoge{url};
+watch %hoge;
+
+
+
+  return \%hoge;
 }
 
-override data_filter => sub {
+sub data_filter {
   my ($self) = @_;
   my $data_filter = super();
   if (my $parent_site = $self->parent_site) {
@@ -88,9 +98,9 @@ override scraper => sub {
   return $scraper;
 };
 
-override url => sub {
+sub url {
   my ($self) = @_;
-  my $url = super();
+  my $url = $self->_url;
   my $config = {};
   if (ref $url eq 'HASH' or ref $url eq 'LinkSeeker::Sites::Site::URL') {
     $config = clone $url;
@@ -153,9 +163,10 @@ override url => sub {
         }
       }
     }
-    return @post_data
+    my @us = @post_data
       ? (map {LinkSeeker::Sites::Site::URL->new(ls => $self->ls, url => $urls[$_], post_data => $post_data[$_], %$config)} 0 .. $#urls)
       : (map {LinkSeeker::Sites::Site::URL->new(ls => $self->ls, url => $_, %$config)} @urls);
+    return @us;
   } elsif (ref $url eq 'ARRAY' and ref $url->[0] eq 'LinkSeeker::Sites::Site::URL') {
     return @$url;
   } else {

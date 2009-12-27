@@ -132,7 +132,7 @@ sub seek_links {
     my $src = $self->_get_html_src($site, $url);
     next unless $src;
     my $data = $self->_get_scraped_data($site, $url, $src);
-    my $unique_name = $url->unique_name;
+    my $unique_name = $url->unique_name($data);
     if (defined $data and my $data_filter = $site->data_filter) {
       my $method = $site->data_filter_method;
       $self->info("data filter with: " . ref($data_filter) . '->' . $method);
@@ -178,7 +178,7 @@ sub seek_links {
               $u->url($url_string);
               push @urls, $u;
             }
-            $site->url(\@urls);
+            $site->_url(\@urls);
           } else {
             $self->debug("url is gotten from $target: $target_url");
             $url = $target_url;
@@ -195,7 +195,8 @@ sub seek_links {
 
 sub _get_html_src {
   my ($self, $site, $url) = @_;
-  Carp::croak("url is required for " . $site->name) unless $url;
+  Carp::croak("url is required for " . $site->name) if not $url;
+  Carp::confess("url must be object for " . $site->name) if ref $url ne 'LinkSeeker::Sites::Site::URL';
   my ($getter, $html_store) = ($site->getter || $self->getter, $site->html_store || $self->html_store);
   my $unique_name = $url->unique_name;
   my $name = $site->name;

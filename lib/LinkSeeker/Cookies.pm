@@ -15,7 +15,7 @@ sub parse {
   $self->new(cookies => \@cookies);
 }
 
-override cookies => sub {
+sub cookies {
   my ($self, $cookies) = @_;
   if (@_ == 2) {
     $self->{cookies} = $cookies;
