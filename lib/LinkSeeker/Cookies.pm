@@ -3,7 +3,13 @@ package LinkSeeker::Cookies;
 use LinkSeeker::Cookies::Cookie;
 use Any::Moose;
 
-has cookies => (is => 'rw');
+has _cookies => (is => 'rw');
+
+sub BUILDARGS {
+  my ($class, %opt) = @_;
+  $opt{_cookies} = delete $opt{cookies};
+  return \%opt;
+}
 
 sub parse {
   my ($self, $url, @cookies_string) = @_;
@@ -18,9 +24,9 @@ sub parse {
 sub cookies {
   my ($self, $cookies) = @_;
   if (@_ == 2) {
-    $self->{cookies} = $cookies;
+    $self->_cookies($cookies)
   }
-  return wantarray ? @{$self->{cookies}} : $self->{cookies};
+  return wantarray ? @{$self->_cookies} : $self->_cookies;
 };
 
 sub as_request_string {

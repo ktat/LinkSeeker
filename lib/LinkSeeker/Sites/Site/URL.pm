@@ -17,13 +17,13 @@ has method => (is => 'rw', default => 'get');
 sub BUILDARGS {
   my ($class, %opt) = @_;
   $opt{_unique_name} = $opt{unique_name};
+  Carp::confess("url/from is empty") if not $opt{url} and not $opt{from};
   return \%opt;
 }
 
 sub unique_name {
   my ($self, $data) = @_;
-  my $url = $self->url or die "URL is empty!";
-
+  my $url = $self->url or Carp::confess "URL is empty!";
   my $unique = $self->_unique_name;
 
   if (ref $unique) {

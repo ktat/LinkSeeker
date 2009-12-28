@@ -65,7 +65,7 @@ watch %hoge;
 
 sub data_filter {
   my ($self) = @_;
-  my $data_filter = super();
+  my $data_filter = $self->SUPER::data_filter;
   if (my $parent_site = $self->parent_site) {
     until ($data_filter) {
       if ($data_filter = $parent_site->data_filter) {
@@ -221,7 +221,7 @@ LinkSeeker::Sites::Site
 
 =head2 url
 
- $site->url;
+# $site->url;
 
 =head1 COPYRIGHT & LICENSE
 
