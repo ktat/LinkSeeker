@@ -154,18 +154,20 @@ sub seek_links {
             $_data = $_data->{$t};
           }
           my $last = $target->[$#{$target}];
-          if (ref $_data eq 'HASH') {
+          if (ref $_data eq 'HASH' and %$_data) {
             push @urls, LinkSeeker::Sites::Site::URL->new(ls => $self, url => $_data->{$last});
-          } else {
+          } elsif (ref $_data eq 'ARRAY') {
             foreach my $d (@$_data) {
               push @urls, LinkSeeker::Sites::Site::URL->new(ls => $self, url => $d->{$last});
             }
+          } else {
+            $self->warn("no url is found. cannot get url from '$last' of data.");
           }
           if (@urls) {
-            $site->url(\@urls);
+            $site->_url(\@urls);
           }
         } elsif (ref $data eq 'HASH' and $data->{$target}) {
-          my $target_url = $data->{$target};
+          my $target_url = $data->{$target} or $self->debug("target ($target) doesn't have any data.");
           if (ref $url) {
             my @target_urls = ref $target_url ? @$target_url : $target_url;
             # if (defined (my $match = $url->match)) {
@@ -182,7 +184,7 @@ sub seek_links {
           } else {
             $self->debug("url is gotten from $target: $target_url");
             $url = $target_url;
-            $site->url($url);
+            $site->_url($url);
           }
         }
         %result = (%result, %{$self->seek_links($site)});
@@ -195,8 +197,8 @@ sub seek_links {
 
 sub _get_html_src {
   my ($self, $site, $url) = @_;
-  Carp::croak("url is required for " . $site->name) if not $url;
-  Carp::confess("url must be object for " . $site->name) if ref $url ne 'LinkSeeker::Sites::Site::URL';
+#  Carp::croak("url is required for " . $site->name) if not $url;
+#  Carp::confess("url must be object for " . $site->name) if ref $url ne 'LinkSeeker::Sites::Site::URL';
   my ($getter, $html_store) = ($site->getter || $self->getter, $site->html_store || $self->html_store);
   my $unique_name = $url->unique_name;
   my $name = $site->name;
