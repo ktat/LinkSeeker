@@ -35,6 +35,13 @@ sub get {
   $ua->max_redirect(0);
   $ua->agent($url_obj->agent || $self->agent || 'LinkSeeker - ' . LinkSeeker->VERSION);
 
+  unless ($url =~m{^http}) {
+    if (my $from_base = $url_obj->from_base) {
+      $url = $from_base . $url;
+    } else {
+      Carp::confess "$url is not started from http!";
+    }
+  }
   my $res = $self->_get($ua, $method, $url, $post_data, $header);
   my $base_url = $url;
 

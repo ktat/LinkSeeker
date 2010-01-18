@@ -5,6 +5,7 @@ use LinkSeeker::Cookies;
 
 has url => (is => 'rw');
 has base => (is => 'rw');
+has from_base => (is => 'rw');
 has from => (is => 'rw');
 # has match => (is => 'rw');
 has post_data => (is => 'rw');
