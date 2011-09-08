@@ -18,6 +18,7 @@ our %DEFAULT_CLASS_CONFIG =
    required => {
                 getter => {class => 'LWP'},
                 log        => { class => 'Stderr'},
+                message    => { class => 'Stderr'},
                },
    optional => {
                 html_store => { class => 'File'},
@@ -244,6 +245,16 @@ sub _get_scraped_data {
     }
   }
   return $data;
+}
+
+sub ok {
+  my ($self, $message) = @_;
+  $self->message->ok($message);
+}
+
+sub ng {
+  my ($self, $message) = @_;
+  $self->message->ng($message);
 }
 
 1;

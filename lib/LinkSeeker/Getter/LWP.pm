@@ -8,6 +8,7 @@ use HTTP::Cookies;
 extends 'LinkSeeker::Getter';
 
 has agent => (is => 'rw', default => 'LinkSeeker version ' . LinkSeeker->VERSION);
+has ua    => (is => 'rw');
 has header => (is => 'rw', isa => 'HashRef');
 has post_data => (is => 'rw', default => '');
 
@@ -20,6 +21,7 @@ sub BUILD {
     }
     $ENV{http_proxy} = $proxy;
   }
+  $self->{ua} = LWP::UserAgent->new;
   return $self;
 }
 
@@ -29,7 +31,7 @@ sub get {
   Carp::confess("url is needed") unless $url;
 
   my $method = $post_data ? 'post' : $url_obj->method;
-  my $ua = LWP::UserAgent->new;
+  my $ua = $self->ua;
   my $header = $url_obj->header || $self->header;
 
   $ua->env_proxy  if $self->ls->{http_proxy};

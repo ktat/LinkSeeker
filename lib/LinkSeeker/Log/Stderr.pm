@@ -5,6 +5,9 @@ extends 'LinkSeeker::Log';
 
 sub _do_log {
   my ($self, $message) = @_;;
+  if ($message =~ m{https?://(.+?):(.+?)@\w+}) {
+     $message =~ s{(https?://)(?:.+?):(?:.+?)@}{$1};
+  }
   print STDERR $message, "\n";
 }
 

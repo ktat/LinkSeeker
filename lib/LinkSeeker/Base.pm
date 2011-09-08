@@ -12,6 +12,8 @@ has html_store  => (is => 'rw',
                     isa => 'LinkSeeker::HtmlStore');
 has scraper     => (is => 'rw');
 
+has message     => (is => 'rw');
+
 has scraper_method  => (is => 'rw');
 
 has data_filter => (is => 'rw');
