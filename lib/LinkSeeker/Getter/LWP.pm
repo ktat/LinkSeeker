@@ -33,6 +33,7 @@ sub get {
 
   $ua->env_proxy  if $self->ls->{http_proxy};
   $ua->max_redirect(0);
+  $ua->cookie_jar({file => "$ENV{HOME}/.cookies.txt" });
   $ua->agent($url_obj->agent || $self->agent || 'LinkSeeker - ' . LinkSeeker->VERSION);
 
   unless ($url =~m{^http}) {
@@ -48,9 +49,6 @@ sub get {
  GET: {
     $self->ls->debug('response status: ' . $res->status_line);
     if ($res->is_success) {
-      my @cookies = $res->header('Set-Cookie');
-      $self->ls->info("receive cookie: " . $_) for @cookies;
-      $self->ls->cookie($url, @cookies);
       my $content =  $res->content;
       return $content;
     } elsif ($res->is_redirect) {
@@ -88,11 +86,6 @@ sub _get {
 
 sub _create_header {
   my ($self, $url, $h) = @_;
-  my $cookie = $self->ls->cookie($url);
-  if (defined $cookie and my $c = $cookie->as_request_string($url)) {
-    $self->ls->info("pass cookie: " . $c);
-    $h->{'Cookie'} = $c;
-  }
   return $h || {};
 }
 

@@ -52,15 +52,12 @@ sub BUILDARGS {
   }
   $opt->{_url} = $opt->{url};
   return {%$opt, ls => $linkseeker, mk_objects => [\%mk_objects]};
-  use Tie::Trace qw/watch/;
-  my %hoge;
-  %hoge = (%$opt, ls => $linkseeker, mk_objects => [\%mk_objects]);
-$hoge{_url} = $hoge{url};
-watch %hoge;
-
-
-
-  return \%hoge;
+  #   use Tie::Trace qw/watch/;
+  #   my %hoge;
+  #   %hoge = (%$opt, ls => $linkseeker, mk_objects => [\%mk_objects]);
+  # $hoge{_url} = $hoge{url};
+  # watch %hoge;
+  # return \%hoge;
 }
 
 sub data_filter {
@@ -107,11 +104,13 @@ sub url {
     $url = '';
     my $base_url = delete $config->{base};
     my $base_post_data = delete $config->{post_data} || '';
-    my $var = clone(delete $config->{variables} || $self->ls->variables) || {};
+    use Data::Dumper;
+    my $local_var = clone(delete $config->{variables} || {});
+    my $var = {%{clone($self->ls->variables) || {}}, %$local_var};
     my $num = 1;
     if (defined $var) {
       my $max = 0;
-      foreach my $k (keys %$var) {
+      foreach my $k (sort {$a cmp $b} keys %$var) {
         my $v = $var->{$k};
         my $_max;
         if (ref $v eq 'ARRAY' and ($v->[0] !~ /\D/ and $v->[1] !~ /\D/)) {

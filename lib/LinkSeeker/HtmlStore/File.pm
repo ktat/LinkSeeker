@@ -2,7 +2,7 @@ package LinkSeeker::HtmlStore::File;
 
 use Any::Moose;
 use File::Slurp qw/slurp write_file/;
-use URI::Escape qw/uri_escape/;
+use URI::Escape qw/uri_escape uri_escape_utf8/;
 
 extends 'LinkSeeker::HtmlStore';
 
@@ -17,7 +17,7 @@ sub store_content {
     }
     mkdir $path;
   }
-  my $file_name = join '/', $path, uri_escape($name_or_url);
+  my $file_name = join '/', $path, uri_escape_utf8($name_or_url);
   $self->ls->debug("html is written to: $file_name");
   write_file($file_name, $src);
 }
@@ -25,7 +25,7 @@ sub store_content {
 sub fetch_content {
   my ($self, $site_name, $name_or_url) = @_;
   my $path = join '/', $self->path, $site_name;
-  my $file_name = join '/', $path, uri_escape($name_or_url);
+  my $file_name = join '/', $path, uri_escape_utf8($name_or_url);
   $self->ls->debug("html is read from: $file_name");
   return scalar slurp($file_name);
 }
@@ -34,7 +34,7 @@ sub has_content {
   my ($self, $site_name, $name_or_url) = @_;
   Carp::croak "name/url is required" unless $name_or_url;
   my $path = join '/', $self->path, $site_name;
-  my $file_name = join '/', $path, uri_escape($name_or_url);
+  my $file_name = join '/', $path, uri_escape_utf8($name_or_url);
   return -e $file_name || 0;
 }
 

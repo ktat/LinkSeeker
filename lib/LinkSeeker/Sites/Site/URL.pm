@@ -1,7 +1,6 @@
 package LinkSeeker::Sites::Site::URL;
 
 use Any::Moose;
-use LinkSeeker::Cookies;
 
 has url => (is => 'rw');
 has base => (is => 'rw');

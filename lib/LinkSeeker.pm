@@ -17,10 +17,6 @@ our %DEFAULT_CLASS_CONFIG =
   (
    required => {
                 getter => {class => 'LWP'},
-                cookie_store => {
-                                 class => 'File',
-                                 path  => $ENV{TMPDIR},
-                                },
                 log        => { class => 'Stderr'},
                },
    optional => {
@@ -250,26 +246,6 @@ sub _get_scraped_data {
   return $data;
 }
 
-sub cookie {
-  my ($self, $url, @cookies) = @_;
-  $self->{urls} ||= {};
-  $self->{urls}->{$url} = 1;
-  my $stored_cookie = $self->{cookie_store}->fetch_cookie($url);
-  # if @cookies is passed, it is time to store cookie.
-  # @cookies is cookie string
-  if (@cookies) {
-    if (my $cookies = LinkSeeker::Cookies->parse($url, @cookies)) {
-      if ($stored_cookie) {
-        $stored_cookie->merge_cookie($cookies);
-      } else {
-        $stored_cookie = $cookies;
-      }
-      $self->{cookie_store}->store_cookie($url, $stored_cookie);
-    }
-  }
-  return $self->{cookie} = $stored_cookie;
-}
-
 1;
 
 =pod
@@ -406,16 +382,6 @@ Do scraping.
 
 used in run method.
 recursively seek links.
-
-=head2 cookie
-
-to get cookie.
-
- $cookies = $ls->cookie($url);
-
-to store cookie.
-
- $ls->cookie($url, @cookies)
 
 =head2 fatal
 

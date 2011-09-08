@@ -3,7 +3,7 @@ package LinkSeeker::DataStore::Dumper;
 use Any::Moose;
 use Data::Dumper;
 use File::Slurp qw/slurp write_file/;
-use URI::Escape qw/uri_escape/;
+use URI::Escape qw/uri_escape_utf8/;
 
 extends 'LinkSeeker::DataStore';
 
@@ -19,7 +19,7 @@ sub store_data {
     }
     mkdir join '/', $path;
   }
-  my $file_name = join '/', $path, uri_escape($name_or_url);
+  my $file_name = join '/', $path, uri_escape_utf8($name_or_url);
   local $Data::Dumper::Terse = 1;
   write_file($file_name, Dumper($data));
 }
@@ -27,7 +27,7 @@ sub store_data {
 sub fetch_data {
   my ($self, $name, $name_or_url) = @_;
   my $path = join '/', $self->path, $name;
-  my $file_name = join '/', $path, uri_escape($name_or_url);
+  my $file_name = join '/', $path, uri_escape_utf8($name_or_url);
   my $data = slurp($file_name);
   return eval "$data";
 }
@@ -35,7 +35,7 @@ sub fetch_data {
 sub has_data {
   my ($self, $name, $name_or_url) = @_;
   my $path = join '/', $self->path, $name;
-  my $file_name = join '/', $path, uri_escape($name_or_url);
+  my $file_name = join '/', $path, uri_escape_utf8($name_or_url);
   return -e $file_name || 0;
 }
 
