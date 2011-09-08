@@ -54,6 +54,11 @@ These links are stored in hash ref with key 'link_seeker_url'.
     ],
  }
 
+=head1 METHOD
+
+=head2 process
+
+It is default method name for scraping.
 
 =head1 COPYRIGHT & LICENSE
 
