@@ -3,6 +3,7 @@ package LinkSeeker::Getter::LWP;
 use Any::Moose;
 use LWP::UserAgent;
 use URI;
+use HTTP::Cookies;
 
 extends 'LinkSeeker::Getter';
 
@@ -33,7 +34,7 @@ sub get {
 
   $ua->env_proxy  if $self->ls->{http_proxy};
   $ua->max_redirect(0);
-  $ua->cookie_jar({file => "$ENV{HOME}/.cookies.txt" });
+  $ua->cookie_jar(HTTP::Cookies->new(file => "$ENV{HOME}/.cookies.txt", autosave => 1));
   $ua->agent($url_obj->agent || $self->agent || 'LinkSeeker - ' . LinkSeeker->VERSION);
 
   unless ($url =~m{^http}) {
