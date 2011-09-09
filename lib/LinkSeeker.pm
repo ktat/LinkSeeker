@@ -9,6 +9,7 @@ extends 'LinkSeeker::Base';
 
 has tmp_path   => (is => 'rw');
 has sleep      => (is => 'rw');
+has tap        => (is => 'rw', default => 0);
 has http_proxy => (is => 'rw');
 has proxy_user => (is => 'rw');
 has proxy_password => (is => 'rw');
@@ -100,7 +101,7 @@ sub run {
   my (@target_site) = @_;
   my $sites = $self->sites;
   unless ($sites) {
-    die "sites method returns undefine value.\ncheck your configuration:\n";
+    die "sites method returns false.\ncheck your configuration:\n";
   }
 
   my %results;
@@ -203,9 +204,9 @@ sub _get_html_src {
   if ($unique_name and $prior_stored_html and defined $html_store and $html_store->has_content($name, $unique_name)) {
     return $html_store->fetch_content($name, $unique_name);
   }
-  my $src = $getter->get($url);
+  my ($src, $res) = $getter->get($url);
   if ($self->sleep) {
-    Time::HiRes::usleep($self->sleep);
+    Time::HiRes::sleep($self->sleep);
   }
   # html_store
   if (defined $html_store) {
@@ -250,6 +251,13 @@ sub _get_scraped_data {
 sub ok {
   my ($self, $message) = @_;
   $self->message->ok($message);
+}
+
+sub total_count {
+  my ($self, $count) = @_;
+  $self->{total_count} ||= 0;
+  $self->{total_count} += $count if $count;
+  return $self->{ttoal_count};
 }
 
 sub ng {

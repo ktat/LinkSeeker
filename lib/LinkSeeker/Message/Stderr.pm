@@ -5,8 +5,8 @@ extends 'LinkSeeker::Message';
 
 sub _do_message {
   my ($self, $status, $message) = @_;;
-  if ($message =~ m{https?://(.+?):(.+?)@\w+}) {
-     $message =~ s{(https?://)(?:.+?):(?:.+?)@(\w+)}{$1$2};
+  if ($message =~ m{https?://(.+?):(.+?)@}) {
+     $message  =~ s{(https?://)(?:.+?):(?:.+?)@}{$1};
   }
   if ($status eq 'ok') {
     print STDERR "\e[36m" . uc($status) . " ", $message, "\e[m\n"

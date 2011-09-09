@@ -22,6 +22,7 @@ sub next_site {
   my $self = shift;
   my $count = $self->site_count;
   if (@{$self->sites} == $count) {
+    $self->ls->total_count(scalar @{$self->sites});
     $self->site_count(0);
     return;
   } else {

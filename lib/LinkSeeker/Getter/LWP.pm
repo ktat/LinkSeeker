@@ -53,7 +53,7 @@ sub get {
     $self->ls->debug('response status: ' . $res->status_line);
     if ($res->is_success) {
       my $content =  $res->content;
-      return $content;
+      return ($content, $res);
     } elsif ($res->is_redirect) {
       my $location = $res->headers->header('Location');
       if ($location !~ /^http/) {
@@ -65,7 +65,8 @@ sub get {
       redo GET;
     } else {
       $self->ls->warn("cannot get content from: " . $url);
-      return;
+      $self->ls->message->ng("$url - " . $res->status_line);
+      return (undef, $res);
     }
   }
 }
