@@ -21,13 +21,17 @@ sub BUILD {
     }
     $ENV{http_proxy} = $proxy;
   }
-  $self->{ua} = LWP::UserAgent->new;
+  $self->{ua} ||= LWP::UserAgent->new;
+  $self->{ua}->cookie_jar(HTTP::Cookies->new(file => "$ENV{HOME}/.cookies.txt", autosave => 1));
   return $self;
 }
 
 sub get {
   my ($self, $url_obj) = @_;
   my ($url, $post_data) = ($url_obj->url, $url_obj->post_data || $self->post_data);
+  if ($self->ls->can($post_data)) {
+    $post_data = $self->ls->$post_data($url_obj);
+  }
   Carp::confess("url is needed") unless $url;
 
   my $method = $post_data ? 'post' : $url_obj->method;
@@ -36,7 +40,6 @@ sub get {
 
   $ua->env_proxy  if $self->ls->{http_proxy};
   $ua->max_redirect(0);
-  $ua->cookie_jar(HTTP::Cookies->new(file => "$ENV{HOME}/.cookies.txt", autosave => 1));
   $ua->agent($url_obj->agent || $self->agent || 'LinkSeeker - ' . LinkSeeker->VERSION);
 
   unless ($url =~m{^http}) {

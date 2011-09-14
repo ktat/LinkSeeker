@@ -4,6 +4,7 @@ use Any::Moose;
 use Config::Any;
 use Time::HiRes ();
 use Clone qw/clone/;
+use Tie::IxHash;
 
 extends 'LinkSeeker::Base';
 
@@ -69,8 +70,11 @@ sub BUILDARGS {
     my $files =  ref $file ? $file : [$file];
     my $cfgs = Config::Any->load_files({files => $files, use_ext => 1});
 
+    $config{sites} = {};
+    tie %{$config{sites}}, 'Tie::IxHash';
     foreach my $f_cfg (@$cfgs) {
       my ($f, $cfg) = %{$f_cfg || {}};
+      %{$config{sites}} = (%{$config{sites}}, %{delete $cfg->{sites}}) if $cfg->{sites};
       @config{keys %$cfg} = values %{$cfg};
     }
   } else {
