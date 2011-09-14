@@ -9,9 +9,9 @@ sub _do_message {
      $message  =~ s{(https?://)(?:.+?):(?:.+?)@}{$1};
   }
   if ($status eq 'ok') {
-    print STDERR "\e[36m" . uc($status) . " ", $message, "\e[m\n"
+    print STDERR "\e[36m" . uc($status) . "\e[m ", $message, "\n"
   } else {
-    print STDERR "\e[31m" . uc($status) . " ", $message, "\e[m\n"
+    print STDERR "\e[31m" . uc($status) . "\e[m ", $message, "\n"
   }
 }
 

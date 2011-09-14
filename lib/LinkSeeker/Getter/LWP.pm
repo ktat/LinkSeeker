@@ -22,7 +22,7 @@ sub BUILD {
     $ENV{http_proxy} = $proxy;
   }
   $self->{ua} ||= LWP::UserAgent->new;
-  $self->{ua}->cookie_jar(HTTP::Cookies->new(file => "$ENV{HOME}/.cookies.txt", autosave => 1));
+  $self->{ua}->cookie_jar(HTTP::Cookies->new(file => "$ENV{HOME}/.link_seeker_cookies.txt", autosave => 1));
   return $self;
 }
 
@@ -68,7 +68,7 @@ sub get {
       redo GET;
     } else {
       $self->ls->warn("cannot get content from: " . $url);
-      $self->ls->message->ng("$url - " . $res->status_line);
+      $self->ls->debug("status line: " . $res->status_line);
       return (undef, $res);
     }
   }

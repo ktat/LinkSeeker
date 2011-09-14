@@ -3,6 +3,7 @@ package LinkSeeker::Sites::Site::URL;
 use Any::Moose;
 
 has url => (is => 'rw');
+has test => (is => 'rw');
 has base => (is => 'rw');
 has from_base => (is => 'rw');
 has from => (is => 'rw');
@@ -17,6 +18,7 @@ has method => (is => 'rw', default => 'get');
 sub BUILDARGS {
   my ($class, %opt) = @_;
   $opt{_unique_name} = $opt{unique_name};
+  $opt{test} ||= {};
   Carp::confess("url/from is empty") if not $opt{url} and not $opt{from};
   return \%opt;
 }
@@ -39,6 +41,9 @@ sub unique_name {
     }
   } elsif($unique) {
     return $unique;
+  } else {
+    # use URL as is
+    $url =~ s{^(https?://)\w+:\w+\@}{$1};
   }
   return $url;
 };

@@ -10,6 +10,7 @@ extends 'LinkSeeker::Base';
 
 has tmp_path   => (is => 'rw');
 has sleep      => (is => 'rw');
+has test       => (is => 'rw');
 has tap        => (is => 'rw', default => 0);
 has http_proxy => (is => 'rw');
 has proxy_user => (is => 'rw');
@@ -60,6 +61,7 @@ sub BUILDARGS {
                 tmp_path       => $ENV{TMPDIR},
                 sleep          => 1,
                 variables      => '',
+                test           => {},
                 http_proxy     => '',
                 proxy_user     => '',
                 proxy_password => '',
@@ -209,6 +211,28 @@ sub _get_html_src {
     return $html_store->fetch_content($name, $unique_name);
   }
   my ($src, $res) = $getter->get($url);
+
+  if (my %test = (%{$self->test}, %{$url->test})) {
+    my $ok = 0;
+    my $_url = $url->url;
+    if ($test{res}) {
+      my $st = $res->status_line;
+      my @res = ref $test{res} ? @{$test{res}} : $test{res};
+      foreach my $r (@res) {
+        if ($st =~m{$r}) {
+          $ok = 1;
+          last;
+        }
+      }
+      $st = "$_url : $st";
+      $ok ? $self->message->ok($st) : $self->message->ng($st);
+    }
+    if ($test{src}) {
+      my $msg = "$_url includes '$test{src}'";
+      $src =~ m{$test{src}} ? $self->message->ok($msg) : $self->message->ng($msg);
+    }
+  }
+
   if ($self->sleep) {
     Time::HiRes::sleep($self->sleep);
   }
