@@ -450,6 +450,18 @@ recursively seek links.
 
  $ls->debug('debug message');
 
+=head2 ng
+
+ $ls->ng($message);
+
+=head2 ok
+
+ $ls->ok($message);
+
+=head2 total_count
+
+ $ls->total_count;
+
 =head1 YAML FILE
 
 =head2 FIRST LAYER SETTING
