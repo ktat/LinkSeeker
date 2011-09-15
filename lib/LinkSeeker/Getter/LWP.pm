@@ -61,6 +61,12 @@ sub get {
       my $location = $res->headers->header('Location');
       if ($location !~ /^http/) {
         $location = URI->new_abs($location, $base_url);
+      } else {
+        my ($cur_domain) = $base_url =~ m{https?://([^/]+)};
+        my ($new_domain) = $location =~ m{https?://([^/]+)};
+        if ($cur_domain ne $new_domain) {
+          $self->ls->warn("'domain name is changed: $cur_domain' -> '$new_domain'");
+        }
       }
       $base_url = $location;
       $self->ls->info("redirect to: " . $location);

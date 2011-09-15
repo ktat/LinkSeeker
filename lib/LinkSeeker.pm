@@ -239,7 +239,7 @@ sub _get_html_src {
   # html_store
   if (defined $html_store) {
     if (defined $src) {
-      $html_store->store_content($name, $unique_name, $src);
+      $html_store->store_content($name, $unique_name, $src) if $res->is_success;
     } elsif ($html_store->has_content($name, $unique_name)) {
       $src = $html_store->fetch_content($name, $unique_name);
     }
@@ -596,7 +596,7 @@ But, in first layer, don't return multiple value.
 
 =head1 SEE ALSO
 
-see LinkSeeker::Manual::Cookbook for detail.
+see LinkSeeker::Manual::Tutorial for detail.
 
 =head1 COPYRIGHT & LICENSE
 
