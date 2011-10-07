@@ -14,6 +14,7 @@ has header => (is => 'rw', isa => 'HashRef');
 has agent  => (is => 'rw',);
 has ls => (is => 'rw', isa => 'LinkSeeker');
 has method => (is => 'rw', default => 'get');
+has no_redirect => (is => 'rw', default => 0);
 
 sub BUILDARGS {
   my ($class, %opt) = @_;

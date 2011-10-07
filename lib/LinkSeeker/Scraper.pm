@@ -6,6 +6,13 @@ extends "LinkSeeker::SubClassBase";
 
 has 'base_url' => (is => 'rw');
 
+our $AUTOLOAD;
+sub AUTOLOAD {
+  my $self = shift;
+  $AUTOLOAD =~s{^.+::}{};
+  $self->ls->info($AUTOLOAD . ' is not implement. scraper does nothing.');
+}
+
 1;
 
 =pod

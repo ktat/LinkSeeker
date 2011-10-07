@@ -229,7 +229,7 @@ sub _get_html_src {
     }
     if ($test{src}) {
       my $msg = "$_url includes '$test{src}'";
-      $src =~ m{$test{src}} ? $self->message->ok($msg) : $self->message->ng($msg);
+      ($src eq $test{src} or $src =~ m{$test{src}}) ? $self->message->ok($msg) : $self->message->ng($msg);
     }
   }
 

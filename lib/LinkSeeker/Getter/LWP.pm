@@ -65,13 +65,18 @@ sub get {
         my ($cur_domain) = $base_url =~ m{https?://([^/]+)};
         my ($new_domain) = $location =~ m{https?://([^/]+)};
         if ($cur_domain ne $new_domain) {
-          $self->ls->warn("'domain name is changed: $cur_domain' -> '$new_domain'");
+          $self->ls->warn("domain name is changed: '$cur_domain' -> '$new_domain'");
         }
       }
-      $base_url = $location;
-      $self->ls->info("redirect to: " . $location);
-      $res = $self->_get($ua, 'get', $location, '', $header);
-      redo GET;
+      if ($url_obj->no_redirect) {
+        $self->ls->info("Location is : '$location'");
+        return ($location, $res);
+      } else {
+        $base_url = $location;
+        $self->ls->info("redirect to: " . $location);
+        $res = $self->_get($ua, 'get', $location, '', $header);
+        redo GET;
+      }
     } else {
       $self->ls->warn("cannot get content from: " . $url);
       $self->ls->debug("status line: " . $res->status_line);
