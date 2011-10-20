@@ -1,6 +1,8 @@
-package LinkSeeker::Message::Stderr;
+package LinkSeeker::Message::Tap;
 
 use Any::Moose;
+use Test::More ();
+
 extends 'LinkSeeker::Message';
 
 sub _do_message {
@@ -8,11 +10,10 @@ sub _do_message {
   if ($message =~ m{https?://(.+?):(.+?)@}) {
      $message  =~ s{(https?://)(?:.+?):(?:.+?)@}{$1};
   }
-  my $indent = '  ' x $self->ls->site_depth;
   if ($status eq 'ok') {
-    print STDERR "$indent" . uc($status)  . " ", $message, "\n"
+    Test::More::ok 1, "$status $message";
   } else {
-    print STDERR "$indent" . uc($status)  . " ", $message, "\n"
+    Test::More::ok 0, "not ok $message";
   }
 }
 
@@ -22,12 +23,12 @@ sub _do_message {
 
 =head1 NAME
 
-LinkSeeker::Message::Stderr -- output message to STDERR
+LinkSeeker::Message::Tap -- TAP output
 
 =head1 SYNOPSYS
 
  message:
-   class: Stderr
+   class: Tap
 
 =head1 COPYRIGHT & LICENSE
 

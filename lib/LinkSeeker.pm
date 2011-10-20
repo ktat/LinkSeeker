@@ -15,6 +15,7 @@ has tap        => (is => 'rw', default => 0);
 has http_proxy => (is => 'rw');
 has proxy_user => (is => 'rw');
 has proxy_password => (is => 'rw');
+has site_depth => (is => 'rw', default => 0, isa => 'Int');
 
 our %DEFAULT_CLASS_CONFIG =
   (
@@ -113,6 +114,8 @@ sub run {
   my %results;
   my %tmp;
   @tmp{@target_site} = ();
+
+  $self->site_depth(0);
   while (my $site = $sites->next_site) {
     if (!@target_site or exists $tmp{$site->name}) {
       $self->info("start linkseeker for: ". $site->name);
@@ -144,6 +147,7 @@ sub seek_links {
     }
     $result{$site->name}{$unique_name} = $data;
     if (my $nest = $site->nest) {
+      $self->site_depth($self->site_depth + 1);
       my $child_sites = LinkSeeker::Sites->new($self, $nest);
       my $parent_site = $site;
       while (my $site = $child_sites->next_site) {
@@ -193,6 +197,7 @@ sub seek_links {
         }
         %result = (%result, %{$self->seek_links($site)});
       }
+      $self->site_depth($self->site_depth - 1);
     }
   }
   # $site->delete_stored_url;

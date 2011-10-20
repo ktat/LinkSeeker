@@ -10,7 +10,7 @@ has ls        => (is => 'rw', isa => 'LinkSeeker');
 sub BUILDARGS {
   my ($self, $linkseeker, $sites_info) = @_;
   my @sites;
-  foreach my $site (keys %$sites_info) {
+  foreach my $site (sort {$a cmp $b} keys %$sites_info) {
     push @sites, LinkSeeker::Sites::Site->new
       ($linkseeker, {name => $site, %{$sites_info->{$site}}});
     $linkseeker->debug('site object is created: ' . $sites[-1]->name);

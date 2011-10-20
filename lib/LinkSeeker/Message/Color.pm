@@ -1,6 +1,7 @@
-package LinkSeeker::Message::Stderr;
+package LinkSeeker::Message::Color;
 
 use Any::Moose;
+use Term::ANSIColor qw(:constants);
 extends 'LinkSeeker::Message';
 
 sub _do_message {
@@ -10,9 +11,11 @@ sub _do_message {
   }
   my $indent = '  ' x $self->ls->site_depth;
   if ($status eq 'ok') {
-    print STDERR "$indent" . uc($status)  . " ", $message, "\n"
+    print STDERR GREEN;
+    print STDERR "$indent" . uc($status) . RESET . " ", $message, "\n"
   } else {
-    print STDERR "$indent" . uc($status)  . " ", $message, "\n"
+    print STDERR RED;
+    print STDERR "$indent" . uc($status) . RESET . " ", $message, "\n"
   }
 }
 
@@ -22,12 +25,12 @@ sub _do_message {
 
 =head1 NAME
 
-LinkSeeker::Message::Stderr -- output message to STDERR
+LinkSeeker::Message::Color -- output colored message
 
 =head1 SYNOPSYS
 
  message:
-   class: Stderr
+   class: Color
 
 =head1 COPYRIGHT & LICENSE
 
