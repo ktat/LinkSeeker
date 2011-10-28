@@ -154,7 +154,7 @@ sub seek_links {
         $site->ls($self);
         $site->parent_site($parent_site);
         my ($url) = $site->url;
-        my $target = $url->from || 'link_seeker_url';
+        my $target = $url->url ? '' : ($url->from || 'link_seeker_url');
         if (ref $target) {
           my $_data = $data;
           my @urls;

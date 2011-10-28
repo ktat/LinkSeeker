@@ -20,7 +20,6 @@ sub BUILDARGS {
   my ($class, %opt) = @_;
   $opt{_unique_name} = $opt{unique_name};
   $opt{test} ||= {};
-  Carp::confess("url/from is empty") if not $opt{url} and not $opt{from};
   return \%opt;
 }
 
