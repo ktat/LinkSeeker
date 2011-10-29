@@ -16,6 +16,8 @@ has http_proxy => (is => 'rw');
 has proxy_user => (is => 'rw');
 has proxy_password => (is => 'rw');
 has site_depth => (is => 'rw', default => 0, isa => 'Int');
+has t          => (is => 'rw',
+                   isa => 'LinkSeeker::Test');
 
 our %DEFAULT_CLASS_CONFIG =
   (
@@ -53,6 +55,13 @@ sub import {
     $class->search_path('add' => $class);
     $class->plugins;
   }
+}
+
+sub BUILD {
+  my $self = shift;
+  $self->{t} = LinkSeeker::Test->new($self);
+  $self->SUPER::BUILD;
+  return $self;
 }
 
 sub BUILDARGS {

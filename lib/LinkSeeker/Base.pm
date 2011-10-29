@@ -3,6 +3,7 @@ package LinkSeeker::Base;
 use Any::Moose;
 use String::CamelCase qw/camelize/;
 use Class::Inspector;
+use LinkSeeker::Test;
 
 has sites       => (is => 'rw',
                     isa => 'LinkSeeker::Sites');
